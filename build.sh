@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cflags="-Wall -03 -g -std=gnu11 -fno-strict-aliasing -Isrc"
+cflags="-Wall -O3 -g -std=gnu11 -fno-strict-aliasing -Isrc"
 lflags="-lSDL2 -lm"
 
 
@@ -11,7 +11,9 @@ mcompiler="moonc"
 cflags="$cflags -DLUA_USE_POSIX"
 lflags="$lflags -o $out"
 
-
+if command -v ccache >/dev/null; then
+  compiler="ccache $compiler"
+fi
 
 echo "compiling ($platform)..."
 echo "Moon files : "
