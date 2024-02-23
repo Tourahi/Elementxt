@@ -21,5 +21,22 @@ void setClipRect(RRect rect);
  */
 void initWindow(SDL_Window *win);
 
+/**
+ *  Updates given rects.
+ */
+void updateRects(RRect *rects, int count);
+
+
+/**
+ *  Gets size of windowSurface.
+ */
+void getSize(int* x, int* y);
+
+
+/**
+ *
+ */
+RImage* newImage(int width, int height);
+void freeImage(RImage *image);
 
 #endif
