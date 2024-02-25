@@ -40,6 +40,23 @@ static const char* utf8ToCodepoint(const char *p, unsigned *dst) {
   return p + 1;
 }
 
+static inline RColor blendPixel(RColor dst, RColor src) {
+  int ia = 0xff - src.a;
+  dst.r = ((src.r * src.a) + (dst.r * ia)) >> 8;
+  dst.g = ((src.g * src.a) + (dst.g * ia)) >> 8;
+  dst.b = ((src.b * src.a) + (dst.b * ia)) >> 8;
+  return dst;
+}
+
+static inline RColor blendPixel2(RColor dst, RColor src, RColor color) {
+  src.a = (src.a * color.a) >> 8;
+  int ia = 0xff - src.a;
+  dst.r = ((src.r * color.r * src.a) >> 16) + ((dst.r * ia) >> 8);
+  dst.g = ((src.g * color.g * src.a) >> 16) + ((dst.g * ia) >> 8);
+  dst.b = ((src.b * color.b * src.a) >> 16) + ((dst.b * ia) >> 8);
+  return dst;
+}
+
 /// End tools
 
 struct RImage {
@@ -162,5 +179,90 @@ static GlyphSet* getGlyphset(RFont *font, int codePoint) {
     font->sets[idx] = loadGlyphset(font, idx);
   }
   return font->sets[idx];
+}
+
+
+RFont* loadFont(const char* filename, float size) {
+  RFont *font = NULL;
+  FILE *filep = NULL;
+
+  /* Init Font */
+  font = checkAlloc(calloc(1, sizeof(RFont)));
+  font->size = size;
+
+  /* load font into buffer */
+  filep = fopen(filename, "rb");
+  if (!filep) { return NULL; }
+
+  /* get buffer size */
+  fseek(filep, 0, SEEK_END); int bufferSize = ftell(filep); seek(filep, 0, SEEK_SET);
+
+  /* load font data*/
+  font->data = checkAlloc(malloc(bufferSize));
+  int _ = fread(font->data, 1, bufferSize, filep); (void) _;
+  fclose(filep);
+  filep = NULL;
+
+  /* init stbfont */
+  int ok = stbtt_InitFont(&font->stbfont, font->data, 0);
+  if (!ok) {goto failedStbfontInit;}
+
+  /* get height and scale */
+  int asc, desc, linegap;
+  stbtt_GetFontVMetrics(&font->stbfont, &asc, &desc, &linegap);
+  float scale = stbtt_ScaleForMappingEmToPixels(&font->stbfont, size);
+  font->height = (asc - desc + linegap) * scale + 0.5;
+
+  /* make tab and newline glyphs invisible */
+  stbtt_bakedchar *g = getGlyphset(font, '\n')->glyphs;
+  g['\t'].x1 = g['\t'].x0;
+  g['\n'].x1 = g['\n'].x0;
+
+  return font;
+
+failedStbfontInit:
+  if (filep) { fclose(filep); }
+  if (font) { free(font->data); }
+  free(font);
+  return NULL;
+}
+
+void freeFont(RFont* font) {
+  for (int i = 0; i < MAX_GLYPHSET; i++) {
+    GlyphSet *set = font->sets[i];
+    if (set) {
+      freeImage(set->image);
+      free(set);
+    }
+    free(font->data);
+    free(font);
+  }
+}
+
+void setFontTabWidth(RFont *font, int n) {
+  GlyphSet *set = getGlyphset(font, '\t');
+  set->glyphs['\t'].xadvance = n;
+}
+
+int getFontTabWidth(RFont *font) {
+  GlyphSet *set = getGlyphset(font, '\t');
+  return set->glyphs['\t'].xadvance;
+}
+
+int getFontWidth(RFont *font, const char *text) {
+  int x = 0;
+  const char *p = text;
+  unsigned codepoint;
+  while (*p) {
+    p = utf8ToCodepoint(p, &codepoint);
+    GlyphSet *set = getGlyphset(font, codepoint);
+    stbtt_bakedchar *g = &set->glyphs[codepoint & 0xff];
+    x += g->xadvance;
+  }
+  return x;
+}
+
+int getFontHeight(RFont *font) {
+  return font->height;
 }
 
