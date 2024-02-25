@@ -10,7 +10,7 @@
 
 /// tools
 
-static void checkAlloc(void *ptr) {
+static void *checkAlloc(void *ptr) {
   if (!ptr) {
     fprintf(stderr, "Fatal error: memory allocation failed\n");
     exit(EXIT_FAILURE);
@@ -106,5 +106,61 @@ void freeImage(RImage *image) {
   free(image);
 }
 
+static GlyphSet* loadGlyphset(RFont *font, int idx) {
+  GlyphSet *set = checkAlloc(calloc(1, sizeof(GlyphSet)));
 
+  /* init image */
+  int width = 128;
+  int height = 128;
+
+retry:
+  set->image = newImage(width, height);
+
+  /* load glyphs */
+  float s =
+    stbtt_ScaleForMappingEmToPixels(&font->stbfont, 1) /
+    stbtt_ScaleForPixelHeight(&font->stbfont, 1);
+  int res = stbtt_BakeFontBitmap(
+    font->data, 0, font->size * s, (void*) set->image->pixels,
+    width, height, idx * 256, 256, set->glyphs);
+
+  /* retry if buffer was not large enough */
+  if (res < 0) {
+    width *= 2;
+    height *= 2;
+    freeImage(set->image);
+    goto retry;
+  }
+  
+  /* adjust glyph yoffsets and xadvance */
+  int asc, desc, linegap;
+  stbtt_GetFontVMetrics(&font->stbfont, &asc, &desc, &linegap);
+  float scale = stbtt_ScaleForMappingEmToPixels(&font->stbfont, font->size);
+  int scaledAsc = asc * scale * 0.5;
+
+  for (int i = 0; i < 256; i++) {
+    /* align glyphs properly with the baseline */
+    set->glyphs[i].yoff += scaledAsc;
+    /* ensure integer values for pixel-perfect rendering && to remove fractional spacing */
+    set->glyphs[i].xadvance = floor(set->glyphs[i].xadvance);
+  }
+
+  /* convert 8bit data to 32bit */
+  for (int i = width * height - 1; i >= 0; i--) {
+    /* cast to uint8_t ptr and then ofsset it by i */
+    uint8_t n = *((uint8_t*) set->image->pixels + i);
+    set->image->pixels[i] = (RColor){ .r = 255, .g = 255, .b = 255, .a = n};
+  }
+
+  return set;
+}
+
+static GlyphSet* getGlyphset(RFont *font, int codePoint) {
+  /* (codePoint >> 8) basically divides by 256 */
+  int idx = (codePoint >> 8) % MAX_GLYPHSET;
+  if (!font->sets[idx]) {
+    font->sets[idx] = loadGlyphset(font, idx);
+  }
+  return font->sets[idx];
+}
 

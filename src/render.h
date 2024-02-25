@@ -39,4 +39,7 @@ void getSize(int* x, int* y);
 RImage* newImage(int width, int height);
 void freeImage(RImage *image);
 
+RFont loadFont(const char* filename, float size);
+void freeFont(RFont* font);
+
 #endif
