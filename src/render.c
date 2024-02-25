@@ -7,6 +7,14 @@
 
 #define MAX_GLYPHSET 256
 
+#define rectDrawLoop(expr)        \
+  for (int j = y1; j < y2; j++) {   \
+    for (int i = x1; i < x2; i++) { \
+      *d = expr;                    \
+      d++;                          \
+    }                               \
+    d += dr;                        \
+  }
 
 /// tools
 
@@ -266,3 +274,75 @@ int getFontHeight(RFont *font) {
   return font->height;
 }
 
+void drawRect(RRect rect, RColor color) {
+  if (color.a == 0) { return; }
+
+  int x1 = rect.x < clip.left ? clip.left : rect.x;
+  int y1 = rect.y < clip.top ? clip.top : rect.y;
+  int x2 = rect.x + rect.width;
+  int y2 = rect.y + rect.height;
+  x2 = x2 > clip.right ? clip.right : x2;
+  y2 = y2 > clip.bottom ? clip.bottom : y2;
+  
+  SDL_Surface *surf = SDL_GetWindowSurface(window);
+  RColor *d = (RColor*) surf->pixels;
+  d += x1 + y1 * surf->w;
+  int dr = surf->w - (x2 - x1);
+
+  if (color.a == 0xff) {
+    rectDrawLoop(color);
+  } else {
+    rectDrawLoop(blendPixel(*d, color));
+  }
+}
+
+void drawImage(RImage *image, RRect *sub, int x, int y, RColor color) {
+  if (color.a == 0) { return; }
+
+  /* clip */
+  int n;
+  if ((n = clip.left - x) > 0) { sub->width  -= n; sub->x += n; x += n; }
+  if ((n = clip.top  - y) > 0) { sub->height -= n; sub->y += n; y += n; }
+  if ((n = x + sub->width  - clip.right ) > 0) { sub->width  -= n; }
+  if ((n = y + sub->height - clip.bottom) > 0) { sub->height -= n; }
+
+  if (sub->width <= 0 || sub->height <= 0) { return; }
+
+  /* draw */
+  SDL_Surface *surf = SDL_GetWindowSurface(window);
+  RColor *s = image->pixels;
+  RColor *d = (RColor*) surf->pixels;
+  s += sub->x + sub->y * image->width;
+  d += x + y * surf->w;
+  int sr = image->width - sub->width;
+  int dr = surf->w - sub->width;
+
+  for (int j = 0; j < sub->height; j++) {
+    for (int i = 0; i < sub->width; i++) {
+      *d = blendPixel2(*d, *s, color);
+      d++;
+      s++;
+    }
+    d += dr;
+    s += sr;
+  }
+}
+
+
+void drawText(RFont *font, const char *text, int x, int y, RColor color) {
+  RRect rect;
+  const char *p = text;
+  unsigned codepoint;
+  while (*p) {
+    p = utf8ToCodepoint(p, &codepoint);
+    GlyphSet *set = getGlyphset(font, codepoint);
+    stbtt_bakedchar *g = &set->glyphs[codepoint & 0xff];
+    rect.x = g->x0;
+    rect.y = g->y0;
+    rect.width = g->x1 - g->x0;
+    rect.height = g->y1 - g->y0;
+    drawImage(set->image, &rect, x + g->xoff, y + g->yoff, color);
+    x += g->xadvance;
+  }
+  return x;
+}
