@@ -34,6 +34,7 @@ void getSize(int* x, int* y);
 
 
 /**
+echo "done"
  *  Create new Image.
  */
 RImage* newImage(int width, int height);
@@ -51,6 +52,6 @@ int getFontHeight(RFont *font);
 void drawRect(RRect rect, RColor color);
 void drawImage(RImage *image, RRect *sub, int x, int y, RColor color);
 
-void drawText(RFont *font, const char *text, int x, int y, RColor color);
+int drawText(RFont *font, const char *text, int x, int y, RColor color);
 
 #endif

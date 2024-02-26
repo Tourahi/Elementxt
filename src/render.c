@@ -203,7 +203,7 @@ RFont* loadFont(const char* filename, float size) {
   if (!filep) { return NULL; }
 
   /* get buffer size */
-  fseek(filep, 0, SEEK_END); int bufferSize = ftell(filep); seek(filep, 0, SEEK_SET);
+  fseek(filep, 0, SEEK_END); int bufferSize = ftell(filep); fseek(filep, 0, SEEK_SET);
 
   /* load font data*/
   font->data = checkAlloc(malloc(bufferSize));
@@ -329,7 +329,7 @@ void drawImage(RImage *image, RRect *sub, int x, int y, RColor color) {
 }
 
 
-void drawText(RFont *font, const char *text, int x, int y, RColor color) {
+int drawText(RFont *font, const char *text, int x, int y, RColor color) {
   RRect rect;
   const char *p = text;
   unsigned codepoint;

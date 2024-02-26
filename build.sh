@@ -38,5 +38,8 @@ if [[ ! $got_error ]]; then
 fi
 
 echo "cleaning up..."
-#TODO
+# cleaning after c
+rm *.o
+rm res.res 2>/dev/null
+# cleaning after moon
 echo "done"
