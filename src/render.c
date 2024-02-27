@@ -18,7 +18,7 @@
 
 /// tools
 
-static void *checkAlloc(void *ptr) {
+static void* checkAlloc(void *ptr) {
   if (!ptr) {
     fprintf(stderr, "Fatal error: memory allocation failed\n");
     exit(EXIT_FAILURE);
@@ -88,21 +88,21 @@ struct RFont {
 static SDL_Window *window;
 static struct { int left, top, right, bottom; } clip;
 
-void setClipRect(RRect rect) {
+void renderSetClipRect(RRect rect) {
   clip.left = rect.x;
   clip.top = rect.y;
   clip.right = rect.x + rect.width;
   clip.bottom = rect.y + rect.height;
 }
 
-void initWindow(SDL_Window *win) {
+void renderInitWindow(SDL_Window *win) {
   assert(win);
   window = win;
   SDL_Surface *surf = SDL_GetWindowSurface(window);
-  setClipRect( (RRect) { 0, 0, surf->w, surf->h } );
+  renderSetClipRect( (RRect) { 0, 0, surf->w, surf->h } );
 }
 
-void updateRects(RRect *rects, int count) {
+void renderUpdateRects(RRect *rects, int count) {
   SDL_UpdateWindowSurfaceRects(window, (SDL_Rect*) rects, count);
   static bool initFrame = true;
   if (initFrame) {
@@ -111,13 +111,13 @@ void updateRects(RRect *rects, int count) {
   }
 }
 
-void getSize(int* x, int* y) {
+void renderGetSize(int* x, int* y) {
   SDL_Surface *s = SDL_GetWindowSurface(window);
   *x = s->w;
   *y = s->h;
 }
 
-RImage* newImage(int width, int height) {
+RImage* renderNewImage(int width, int height) {
   assert(width > 0 && height > 0);
   RImage *image = malloc(sizeof(RImage) + width * height * sizeof(RColor));
   checkAlloc(image);
@@ -127,7 +127,7 @@ RImage* newImage(int width, int height) {
   return image;
 }
 
-void freeImage(RImage *image) {
+void renderFreeImage(RImage *image) {
   free(image);
 }
 
@@ -139,7 +139,7 @@ static GlyphSet* loadGlyphset(RFont *font, int idx) {
   int height = 128;
 
 retry:
-  set->image = newImage(width, height);
+  set->image = renderNewImage(width, height);
 
   /* load glyphs */
   float s =
@@ -153,7 +153,7 @@ retry:
   if (res < 0) {
     width *= 2;
     height *= 2;
-    freeImage(set->image);
+    renderFreeImage(set->image);
     goto retry;
   }
   
@@ -190,7 +190,7 @@ static GlyphSet* getGlyphset(RFont *font, int codePoint) {
 }
 
 
-RFont* loadFont(const char* filename, float size) {
+RFont* renderLoadFont(const char* filename, float size) {
   RFont *font = NULL;
   FILE *filep = NULL;
 
@@ -213,7 +213,7 @@ RFont* loadFont(const char* filename, float size) {
 
   /* init stbfont */
   int ok = stbtt_InitFont(&font->stbfont, font->data, 0);
-  if (!ok) {goto failedStbfontInit;}
+  if (!ok) { goto failedStbfontInit; }
 
   /* get height and scale */
   int asc, desc, linegap;
@@ -235,11 +235,11 @@ failedStbfontInit:
   return NULL;
 }
 
-void freeFont(RFont* font) {
+void renderFreeFont(RFont* font) {
   for (int i = 0; i < MAX_GLYPHSET; i++) {
     GlyphSet *set = font->sets[i];
     if (set) {
-      freeImage(set->image);
+      renderFreeImage(set->image);
       free(set);
     }
     free(font->data);
@@ -247,17 +247,17 @@ void freeFont(RFont* font) {
   }
 }
 
-void setFontTabWidth(RFont *font, int n) {
+void renderSetFontTabWidth(RFont *font, int n) {
   GlyphSet *set = getGlyphset(font, '\t');
   set->glyphs['\t'].xadvance = n;
 }
 
-int getFontTabWidth(RFont *font) {
+int renderGetFontTabWidth(RFont *font) {
   GlyphSet *set = getGlyphset(font, '\t');
   return set->glyphs['\t'].xadvance;
 }
 
-int getFontWidth(RFont *font, const char *text) {
+int renderGetFontWidth(RFont *font, const char *text) {
   int x = 0;
   const char *p = text;
   unsigned codepoint;
@@ -270,11 +270,11 @@ int getFontWidth(RFont *font, const char *text) {
   return x;
 }
 
-int getFontHeight(RFont *font) {
+int renderGetFontHeight(RFont *font) {
   return font->height;
 }
 
-void drawRect(RRect rect, RColor color) {
+void renderDrawRect(RRect rect, RColor color) {
   if (color.a == 0) { return; }
 
   int x1 = rect.x < clip.left ? clip.left : rect.x;
@@ -296,7 +296,7 @@ void drawRect(RRect rect, RColor color) {
   }
 }
 
-void drawImage(RImage *image, RRect *sub, int x, int y, RColor color) {
+void renderDrawImage(RImage *image, RRect *sub, int x, int y, RColor color) {
   if (color.a == 0) { return; }
 
   /* clip */
@@ -329,7 +329,7 @@ void drawImage(RImage *image, RRect *sub, int x, int y, RColor color) {
 }
 
 
-int drawText(RFont *font, const char *text, int x, int y, RColor color) {
+int renderDrawText(RFont *font, const char *text, int x, int y, RColor color) {
   RRect rect;
   const char *p = text;
   unsigned codepoint;
@@ -341,7 +341,7 @@ int drawText(RFont *font, const char *text, int x, int y, RColor color) {
     rect.y = g->y0;
     rect.width = g->x1 - g->x0;
     rect.height = g->y1 - g->y0;
-    drawImage(set->image, &rect, x + g->xoff, y + g->yoff, color);
+    renderDrawImage(set->image, &rect, x + g->xoff, y + g->yoff, color);
     x += g->xadvance;
   }
   return x;
