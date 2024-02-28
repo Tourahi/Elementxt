@@ -1,5 +1,6 @@
 #include "api.h"
 
+int luaopenSys(lua_State *L);
 
 static const luaL_Reg libs[] = {
   {NULL, NULL}
