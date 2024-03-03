@@ -99,3 +99,46 @@ static void fileCallback(logEvent *e) {
   fprintf(e->udata, "\n");
   fflush(e->udata);
 }
+
+int logAddFp(FILE *fp, int level) {
+  return logAddCallback(fileCallback, fp, level);
+}
+
+
+static void lock(void) {
+  if (LOG.lock) { LOG.lock(true, LOG.udata); }
+}
+
+static void unlock(void) {
+  if (LOG.lock) { LOG.lock(false, LOG.udata); }
+}
+
+void logLog(int level, const char *file, int line, const char *fmt, ...) {
+  logEvent e = {
+    .fmt   = fmt,
+    .file  = file,
+    .line  = line,
+    .level = level,
+  };
+
+  lock();
+
+  if (!LOG.quiet && level >= LOG.level) {
+    initEvent(&e, stderr);
+    va_start(e.ap, fmt);
+    stdoutCallback(&e);
+    va_end(e.ap);
+  }
+
+  for (int i = 0; i < MAX_CALLBACKS && LOG.callbacks[i].fn; i++) {
+    Callback *cb = &LOG.callbacks[i];
+    if (level >= cb->level) {
+      initEvent(&e, cb->udata);
+      va_start(e.ap, fmt);
+      cb->fn(&e);
+      va_end(e.ap);
+    }
+  }
+
+  unlock();
+}

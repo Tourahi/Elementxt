@@ -1,8 +1,12 @@
+#include "tools/log.h"
+
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include "api/api.h"
 #include "render.h"
 #include <unistd.h>
+
+
 
 SDL_Window *window;
 
@@ -12,6 +16,8 @@ SDL_Window *window;
 
 int main(int argc, char **argv)
 {
+  logTrace("SDL INIT.");
+
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
   SDL_EnableScreenSaver();
   SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
