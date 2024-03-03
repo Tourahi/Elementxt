@@ -8,7 +8,7 @@
 
 void crShowDebug (bool enable);
 void crFreeFont (RFont *font);
-void crSetClipRect (RRect *rect);
+void crSetClipRect (RRect rect);
 void crDrawRect (RRect rect, RColor color);
 
 

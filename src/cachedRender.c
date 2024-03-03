@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "cachedRender.h"
-
+#include "tools/log.h"
 
 #define CELLS_X 80
 #define CELLS_Y 50
@@ -77,7 +77,7 @@ static Command* pushCommand(int type, int size) {
   Command *cmd = (Command*) (commandBuf + commandBufIdx);
   int n = commandBufIdx + size;
   if (n > COMMAND_BUF_SIZE) {
-    /* TODO: WARNING SYS */
+    logWarn("Exhausted command buffer.");
     return NULL;
   }
 
@@ -98,3 +98,24 @@ static bool nextCmd(Command **prev) {
   return *prev != ((Command*) (commandBuf + commandBufIdx));
 }
 
+void crShowDebug (bool enable) {
+  showDebug = enable;
+}
+
+void crFreeFont(RFont *font) {
+  Command *cmd = pushCommand(FREE_FONT, sizeof(Command));
+}
+
+void crSetClipRect (RRect rect) {
+  Command *cmd = pushCommand(SET_CLIP, sizeof(Command));
+  if (cmd) { cmd->rect = intersectRects(rect, screenRect); }
+}
+
+void crDrawRect (RRect rect, RColor color) {
+  if (!rectsOverlap(screenRect, rect)) { return; }
+  Command *cmd = pushCommand(DRAW_RECT, sizeof(Command));
+  if (cmd) {
+    cmd->rect = rect;
+    cmd->color = color;
+  }
+}
