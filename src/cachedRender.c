@@ -74,7 +74,7 @@ static RRect mergeRects(RRect a, RRect b) {
 
 
 static Command* pushCommand(int type, int size) {
-  Command *cmd = (*Command) (commandBuf + commandBufIdx);
+  Command *cmd = (Command*) (commandBuf + commandBufIdx);
   int n = commandBufIdx + size;
   if (n > COMMAND_BUF_SIZE) {
     /* TODO: WARNING SYS */
@@ -95,6 +95,6 @@ static bool nextCmd(Command **prev) {
   } else {
     *prev = (Command*) (((char*) *prev) + (*prev)->size);
   }
-  return *prev != ((Command*) (command_buf + command_buf_idx));
+  return *prev != ((Command*) (commandBuf + commandBufIdx));
 }
 
