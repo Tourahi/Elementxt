@@ -31,6 +31,11 @@ typedef void (*logLogFn)(logEvent *ev);
 typedef void (*logLockFn)(bool lock, void *udata);
 
 #define logTrace(...) logLog(TRACE, __FILE__, __LINE__, __VA_ARGS__)
+#define logTDebug(...) logLog(DEBUG, __FILE__, __LINE__, __VA_ARGS__)
+#define logInfo(...) logLog(INFO, __FILE__, __LINE__, __VA_ARGS__)
+#define logWarn(...) logLog(WARN, __FILE__, __LINE__, __VA_ARGS__)
+#define logError(...) logLog(ERROR, __FILE__, __LINE__, __VA_ARGS__)
+#define logFatal(...) logLog(FATAL, __FILE__, __LINE__, __VA_ARGS__)
 
 
 const char* logLevelStr(int level);
