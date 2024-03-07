@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include "cachedRender.h"
+
 #include "tools/log.h"
 
 #define CELLS_X 80
 #define CELLS_Y 50
 #define CELL_SIZE 96
 #define COMMAND_BUF_SIZE (1024 * 512)
-
 
 enum { FREE_FONT, SET_CLIP, DRAW_TEXT, DRAW_RECT };
 
@@ -18,7 +18,6 @@ typedef struct {
   int tabWidth;
   char text[0];
 } Command;
-
 
 static unsigned cellsBuf1[CELLS_X * CELLS_Y];
 static unsigned cellsBuf2[CELLS_X * CELLS_Y];
@@ -98,12 +97,36 @@ static bool nextCmd(Command **prev) {
   return *prev != ((Command*) (commandBuf + commandBufIdx));
 }
 
+/*
+  * Useful res:
+    * https://en.wikipedia.org/wiki/UTF-8
+    * https://stackoverflow.com/questions/27331819/whats-the-difference-between-a-character-a-code-point-a-glyph-and-a-grapheme
+*/
+static const char* utf8ToCodepoint(const char* p, unsigned  *dst) {
+  unsigned res, n;
+
+  switch (*p & 0xf0)  {
+    case 0xf0 : res = *p & 0x07;  n = 3;  break;
+    case 0xe0 :  res = *p & 0x0f;  n = 2;  break;
+    case 0xd0 :
+    case 0xc0 :  res = *p & 0x1f;  n = 1;  break;
+    default   :  res = *p;         n = 0;  break;
+  }
+  while (n--) {
+    res = (res << 6) | (*(++p) & 0x3f);
+  }
+
+  *dst = res;
+  return p + 1;
+}
+
 void crShowDebug (bool enable) {
   showDebug = enable;
 }
 
 void crFreeFont(RFont *font) {
   Command *cmd = pushCommand(FREE_FONT, sizeof(Command));
+  if (cmd) { cmd->font = font; }
 }
 
 void crSetClipRect (RRect rect) {
@@ -118,4 +141,25 @@ void crDrawRect (RRect rect, RColor color) {
     cmd->rect = rect;
     cmd->color = color;
   }
+}
+
+int crDrawText(RFont *font, const char *text, int x, int y, RColor color) {
+  RRect rect;
+  rect.x = x;
+  rect.y = y;
+  rect.width = renderGetFontWidth(font, text);
+  rect.height = renderGetFontHeight(font);
+  
+  if (rectsOverlap(screenRect, rect)) {
+    int sz = strlen(text) + 1;
+    Command *cmd = pushCommand(DRAW_TEXT, sizeof(Command) + sz);
+    if (cmd) {
+      cmd->color = color;
+      cmd->font = font;
+      cmd->rect = rect;
+      cmd->tabWidth = renderGetFontTabWidth(font);
+    }
+  }
+
+  return x + rect.width;
 }

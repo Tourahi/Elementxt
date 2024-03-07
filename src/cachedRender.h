@@ -11,7 +11,7 @@ void crFreeFont (RFont *font);
 void crSetClipRect (RRect rect);
 void crDrawRect (RRect rect, RColor color);
 
-
+int  crDrawText(RFont *font, const char *text, int x, int y, RColor color);
 
 
 #endif

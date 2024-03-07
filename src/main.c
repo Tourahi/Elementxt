@@ -17,7 +17,7 @@ SDL_Window *window;
 int main(int argc, char **argv)
 {
   logTrace("SDL INIT.");
-
+  
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
   SDL_EnableScreenSaver();
   SDL_EventState(SDL_DROPFILE, SDL_ENABLE);

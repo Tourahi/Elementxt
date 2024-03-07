@@ -85,6 +85,7 @@ struct RFont {
   int height;
 };
 
+
 static SDL_Window *window;
 static struct { int left, top, right, bottom; } clip;
 
