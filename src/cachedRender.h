@@ -13,5 +13,7 @@ void crDrawRect (RRect rect, RColor color);
 
 int  crDrawText(RFont *font, const char *text, int x, int y, RColor color);
 
+void crInvalidate(void);
+void crBeginFrame(void);
 
 #endif

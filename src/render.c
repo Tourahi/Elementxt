@@ -10,10 +10,10 @@
 #define rectDrawLoop(expr)        \
   for (int j = y1; j < y2; j++) {   \
     for (int i = x1; i < x2; i++) { \
-      *d = expr;                    \
-      d++;                          \
+      *dPos = expr;                    \
+      dPos++;                          \
     }                               \
-    d += dr;                        \
+    dPos += dNextRow;                        \
   }
 
 /// tools
@@ -286,14 +286,16 @@ void renderDrawRect(RRect rect, RColor color) {
   y2 = y2 > clip.bottom ? clip.bottom : y2;
   
   SDL_Surface *surf = SDL_GetWindowSurface(window);
-  RColor *d = (RColor*) surf->pixels;
-  d += x1 + y1 * surf->w;
-  int dr = surf->w - (x2 - x1);
+  RColor *dPos = (RColor*) surf->pixels;
+  /* Pos(pixel) to start drawing at */
+  dPos += x1 + y1 * surf->w;
+  /* dist to next pixels row */
+  int dNextRow = surf->w - (x2 - x1);
 
   if (color.a == 0xff) {
     rectDrawLoop(color);
   } else {
-    rectDrawLoop(blendPixel(*d, color));
+    rectDrawLoop(blendPixel(*dPos, color));
   }
 }
 

@@ -163,3 +163,19 @@ int crDrawText(RFont *font, const char *text, int x, int y, RColor color) {
 
   return x + rect.width;
 }
+
+void crInvalidate(void) {
+  memset(cellsPrev, 0xff, sizeof(cellsBuf1));
+}
+
+void crBeginFrame(void) {
+  int w, h;
+  renderGetSize(&w, &h);
+  if (screenRect.width != w || h != screenRect.height) {
+    screenRect.width = w;
+    screenRect.height = h;
+    crInvalidate();
+  }
+}
+
+
