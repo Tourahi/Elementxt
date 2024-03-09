@@ -159,6 +159,7 @@ retry:
   }
   
   /* adjust glyph yoffsets and xadvance */
+  /* https://www.zhangxinxu.com/wordpress/2022/03/css-ascent-override-descent/ */
   int asc, desc, linegap;
   stbtt_GetFontVMetrics(&font->stbfont, &asc, &desc, &linegap);
   float scale = stbtt_ScaleForMappingEmToPixels(&font->stbfont, font->size);

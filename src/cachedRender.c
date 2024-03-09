@@ -178,4 +178,124 @@ void crBeginFrame(void) {
   }
 }
 
+static void updateOverlappingCells(RRect r, unsigned h) {
+  int x1 = r.x /  CELL_SIZE;
+  int y1 = r.y /  CELL_SIZE;
+  int x2 = (r.x + r.width) /  CELL_SIZE;
+  int y2 = (r.y + r.height) /  CELL_SIZE;
+
+
+  for (int y = y1; y <= y2; y++) {
+    for (int x = x1; x <= x2; x++){
+      int idx = cellIdx(x, y);
+      hash(&cells[idx], &h, sizeof(h));
+    }
+  }
+}
+
+static void pushRect(RRect r, int *count) {
+  /* Try to merge the rect with an existing one */
+  for (int i = *count - 1; i >= 0; i--) {
+    RRect *rp = &rectBuf[i];
+    if (rectsOverlap(*rp, r)) {
+      *rp = mergeRects(*rp, r);
+      return;
+    }
+  }
+  /* if we cant merge we insert it */
+  rectBuf[(*count)++] = r;
+}
+
+
+void crEndFrame(void) {
+  /* Update cells from commands */ 
+  Command *cmd = NULL;
+  RRect cr = screenRect;
+  while (nextCmd(&cmd)) {
+    if (cmd->type == SET_CLIP) { cr = cmd->rect; }
+    RRect r = intersectRects(cmd->rect, cr);
+    if (r.width == 0 || r.height == 0) { continue; }
+    unsigned h = HASH_INITIAL;
+    hash(&h, cmd, cmd->size);
+    updateOverlappingCells(r, h);
+  }
+
+  int rectCount = 0;
+  int maxX = screenRect.width / CELL_SIZE + 1;
+  int maxY = screenRect.height / CELL_SIZE + 1;
+
+  for (int y = 0; y < maxY; y++) {
+    for (int x = 0; x < maxX; x++) {
+      int idx = cellIdx(x, y);
+      if (cells[idx] != cellsPrev[idx]) {
+        pushRect((RRect) { x, y, 1, 1 }, &rectCount);
+      }
+      cellsPrev[idx] = HASH_INITIAL;
+    }
+  }
+
+  /* expand rects */
+  for (int i = 0; i < rectCount; i++) {
+    RRect *r = &rectBuf[i];
+    r->x *= CELL_SIZE;
+    r->y *= CELL_SIZE;
+    r->width *= CELL_SIZE;
+    r->height *= CELL_SIZE;
+    *r = intersectRects(*r, screenRect);
+  }
+
+  /* redraw updated regions */
+  bool hasFreeCmds = false;
+  for (int i = 0; i < rectCount; i++) {
+    RRect r = rectBuf[i];
+    renderSetClipRect(r);
+
+    cmd = NULL;
+    while (nextCmd(&cmd)) {
+      switch (cmd->type) {
+        case FREE_FONT:
+          hasFreeCmds = true;
+          break;
+        case SET_CLIP:
+          renderSetClipRect(intersectRects(cmd->rect, r));
+          break;
+        case DRAW_RECT:
+          renderDrawRect(cmd->rect, cmd->color);
+          break;
+        case DRAW_TEXT:
+          renderSetFontTabWidth(cmd->font, cmd->tabWidth);
+          renderDrawText(cmd->font, cmd->text, cmd->rect.x, cmd->rect.y, cmd->color);
+          break;
+      }
+    }
+
+    /* DEBUG TRUE (TODO: flag)*/
+    if (true) {
+      RColor color = { rand(), rand(), rand(), 50};
+      renderDrawRect(r, color);
+    }
+  }
+
+  /* update dirty rects */  
+  if (rectCount > 0) {
+    renderUpdateRects(rectBuf, rectCount);
+  }
+
+  if (hasFreeCmds) {
+    cmd = NULL;
+    while (nextCmd(&cmd)) {
+      if (cmd->type == FREE_FONT) {
+        renderFreeFont(cmd->font);
+      }
+    }
+  }
+
+  unsigned *tmp = cells;
+  cells = cellsPrev;
+  cellsPrev = tmp;
+  commandBufIdx = 0;
+}
+
+
+
 
