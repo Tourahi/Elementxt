@@ -84,7 +84,8 @@ int luaopen_render_font(lua_State *L);
 
 int luaopenSys(lua_State *L) {
   luaL_newlib(L, lib);
-  // FONT TODO
+  luaopen_render_font(L);
+  lua_setfield(L, -2, "font");
   return 1;
 }
 
