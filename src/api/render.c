@@ -1,5 +1,6 @@
 #include "api.h"
 #include "render.h"
+#include "cachedRender.h"
 
 
 static RColor checkColor(lua_State *L, int idx, int def) {
@@ -27,15 +28,63 @@ static int fGetSize(lua_State *L) {
   return 2;
 }
 
+static int fBeginFrame(lua_State  *L) {
+  crBeginFrame();
+  return 0;
+}
+
+static int fEndFrame(lua_State  *L) {
+  crEndFrame();
+  return 0;
+}
+
+static int fSetClipRect(lua_State  *L) {
+  RRect rect;
+  rect.x = luaL_checknumber(L, 1);
+  rect.y = luaL_checknumber(L, 2);
+  rect.width = luaL_checknumber(L, 3);
+  rect.height = luaL_checknumber(L, 4);
+  crSetClipRect(rect);
+  return 0;
+}
+
+static int fDrawRect(lua_State  *L) {
+  RRect rect;
+  rect.x = luaL_checknumber(L, 1);
+  rect.y = luaL_checknumber(L, 2);
+  rect.width = luaL_checknumber(L, 3);
+  rect.height = luaL_checknumber(L, 4);
+  RColor color = checkColor(L, 5, 255);
+  crDrawRect(rect, color);
+  return 0;
+}
+
+static int fDrawText(lua_State  *L) {
+  RFont **font = luaL_checkudata(L, 1, API_TYPE_FONT);
+  const char *text = luaL_checkstring(L, 2);
+  int x = luaL_checknumber(L, 3);
+  int y = luaL_checknumber(L, 4);
+  RColor color = checkColor(L, 5, 255);
+  x = crDrawText(*font, text, x, y, color);
+  lua_pushnumber(L, x);
+  return 1;
+}
 
 static const luaL_Reg lib[] = {
   { "getSize", fGetSize },
+  { "beginFrame", fBeginFrame },
+  { "endFRame", fEndFrame },
+  { "setClipRect", fSetClipRect },
+  { "drawRect", fDrawRect },
+  { "drawText", fDrawText },
   { NULL,      NULL     }
 };
 
+int luaopen_render_font(lua_State *L);
 
 int luaopenSys(lua_State *L) {
   luaL_newlib(L, lib);
+  // FONT TODO
   return 1;
 }
 
