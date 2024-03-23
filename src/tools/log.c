@@ -81,23 +81,23 @@ static void stdoutCallback(logEvent *e) {
     e->file, e->line);
 #else
   fprintf(
-    e->udata, "%s %-5s %s:%d: ",
+    (FILE*) e->udata, "%s %-5s %s:%d: ",
     buf, levelStrings[e->level], e->file, e->line);
 #endif
-  vfprintf(e->udata, e->fmt, e->ap);
-  fprintf(e->udata, "\n");
-  fflush(e->udata);
+  vfprintf((FILE*) e->udata, e->fmt, e->ap);
+  fprintf((FILE*) e->udata, "\n");
+  fflush((FILE*) e->udata);
 }
 
 static void fileCallback(logEvent *e) {
   char buf[64];
   buf[strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", e->time)] = '\0';
   fprintf(
-    e->udata, "%s %-5s %s:%d: ",
+    (FILE*) e->udata, "%s %-5s %s:%d: ",
     buf, levelStrings[e->level], e->file, e->line);
-  vfprintf(e->udata, e->fmt, e->ap);
-  fprintf(e->udata, "\n");
-  fflush(e->udata);
+  vfprintf((FILE*) e->udata, e->fmt, e->ap);
+  fprintf((FILE*) e->udata, "\n");
+  fflush((FILE*) e->udata);
 }
 
 int logAddFp(FILE *fp, int level) {
