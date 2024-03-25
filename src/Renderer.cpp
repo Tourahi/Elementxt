@@ -27,8 +27,7 @@ struct Elementxt::Renderer::RImage {
   int width, height;
 };
 
-
-struct RFont {
+struct Elementxt::Renderer::RFont {
   void *data;
   stbtt_fontinfo stbfont;
   GlyphSet *sets[MAX_GLYPHSET];
@@ -89,4 +88,106 @@ void Elementxt::Renderer::rendererFreeImage(Elementxt::Renderer::RImage *image) 
   free(image);
 }
 
+static GlyphSet* loadGlypset(Elementxt::Renderer::RFont *font, int idx) {
+  GlyphSet *set = (GlyphSet*) checkAlloc(calloc(1, sizeof(GlyphSet)));
+
+  // init image
+  int width = 128;
+  int height = 128;
+
+  bool valideBufferSize = false;
+
+  while (!valideBufferSize)
+  {
+    set->image = Elementxt::Renderer::rendererNewImage(width, height);
+
+    float s = 
+      stbtt_ScaleForMappingEmToPixels(&font->stbfont, 1) /
+      stbtt_ScaleForPixelHeight(&font->stbfont, 1);
+    
+    int res = stbtt_BakeFontBitmap(
+      (const unsigned char*)  font->data, 0, font->size * s, (unsigned char*) set->image->pixels,
+      width, height, idx * 256, 256, set->glyphs
+    );
+
+    if (res < 0) {
+      width *= 2;
+      height *= 2;
+      Elementxt::Renderer::rendererFreeImage(set->image);
+      continue;
+    }
+    valideBufferSize = true;
+  }
+  
+  int asc, desc, linegap;
+  stbtt_GetFontVMetrics(&font->stbfont, &asc, &desc, &linegap);
+  float scale = stbtt_ScaleForMappingEmToPixels(&font->stbfont, font->size);
+  int scaledAsc = asc * scale * 0.5;
+
+  for (int i = 0; i < 256; i++) {
+    /* align glyphs properly with the baseline */
+    set->glyphs[i].yoff += scaledAsc;
+    /* ensure integer values for pixel-perfect rendering && to remove fractional spacing */
+    set->glyphs[i].xadvance = floor(set->glyphs[i].xadvance);
+  }
+
+  /* convert 8bit data to 32bit */
+  for (int i = width * height - 1; i >= 0; i--) {
+    /* cast to uint8_t ptr and then offset it by i */
+    uint8_t n = *((uint8_t*) set->image->pixels + i);
+    set->image->pixels[i] = (Elementxt::Renderer::RColor){ .r = 255, .g = 255, .b = 255, .a = n};
+  }
+
+  return set;
+}
+
+static GlyphSet* getGlyphset(Elementxt::Renderer::RFont *font, int codePoint) {
+
+  int idx = (codePoint >> 8) % MAX_GLYPHSET;
+  if (!font->sets[idx]) {
+    font->sets[idx] = loadGlypset(font, idx);
+  }
+  return font->sets[idx];
+}
+
+Elementxt::Renderer::RFont* Elementxt::Renderer::rendererFreeImage(const char* filename, float size) {
+  Elementxt::Renderer::RFont *font = NULL;
+  FILE *filep = NULL;
+
+  // init font
+  font = (Elementxt::Renderer::RFont*) checkAlloc(calloc(1, sizeof(Elementxt::Renderer::RFont)));
+  font->size = size;
+
+  // load font onto buffer
+  filep = fopen(filename, "rb");
+  if (!filep) { return NULL; }
+
+  fseek(filep, 0, SEEK_END); int bufferSize = ftell(filep); fseek(filep, 0, SEEK_SET);
+
+  // load font data
+  font->data = checkAlloc(malloc(bufferSize));
+  int _ = fread(font->data, 1, bufferSize, filep); (void) _;
+  fclose(filep);
+  filep = NULL;
+
+  int ok = stbtt_InitFont(&font->stbfont, (const unsigned char*)font->data, 0);
+  if (!ok) {
+    if (filep) { fclose(filep); }
+    if (font) { free(font->data); }
+    free(font);
+    return NULL;
+  }
+
+  int asc, desc, linegap;
+  stbtt_GetFontVMetrics(&font->stbfont, &asc, &desc, &linegap);
+  float scale = stbtt_ScaleForMappingEmToPixels(&font->stbfont, size);
+  font->height = (asc - desc + linegap) * scale + 0.5;
+
+  stbtt_bakedchar *g = getGlyphset(font, '\n')->glyphs;
+  g['\t'].x1 = g['\t'].x0;
+  g['\n'].x1 = g['\n'].x0;
+
+  return font;
+
+}
 
