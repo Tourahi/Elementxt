@@ -27,5 +27,7 @@ namespace Renderer
   int     rendererGetFontHeight(RFont *font);
 
   void    rendererDrawRect(RRect rect, RColor color);
+  void    rendererDrawImage(RImage *image, RRect *sub, int x, int y, RColor color);
+  int     rendererDrawText(RFont *font, const char *text, int x, int y, RColor color);
 
 }
