@@ -38,7 +38,7 @@ static const char* utf8ToCodepoint(const char *p, unsigned *dst) {
   return p + 1;
 }
 
-static inline Elementxt::Renderer::RColor blendPixel(Elementxt::Renderer::RColor dst, Elementxt::Renderer::RColor src) {
+static inline Renderer::RColor blendPixel(Renderer::RColor dst, Renderer::RColor src) {
   int ia = 0xff - src.a;
   dst.r = ((src.r * src.a) + (dst.r * ia)) >> 8;
   dst.g = ((src.g * src.a) + (dst.g * ia)) >> 8;
@@ -46,8 +46,8 @@ static inline Elementxt::Renderer::RColor blendPixel(Elementxt::Renderer::RColor
   return dst;
 }
 
-static inline Elementxt::Renderer::RColor blendPixel2(Elementxt::Renderer::RColor dst, Elementxt::Renderer::RColor src, 
-  Elementxt::Renderer::RColor color) {
+static inline Renderer::RColor blendPixel2(Renderer::RColor dst, Renderer::RColor src, 
+  Renderer::RColor color) {
   src.a = (src.a * color.a) >> 8;
   int ia = 0xff - src.a;
   dst.r = ((src.r * color.r * src.a) >> 16) + ((dst.r * ia) >> 8);
@@ -57,16 +57,16 @@ static inline Elementxt::Renderer::RColor blendPixel2(Elementxt::Renderer::RColo
 }
 
 typedef struct {
-  Elementxt::Renderer::RImage *image;
+  Renderer::RImage *image;
   stbtt_bakedchar glyphs[256];
 } GlyphSet;
 
-struct Elementxt::Renderer::RImage {
+struct Renderer::RImage {
   RColor *pixels;
   int width, height;
 };
 
-struct Elementxt::Renderer::RFont {
+struct Renderer::RFont {
   void *data;
   stbtt_fontinfo stbfont;
   GlyphSet *sets[MAX_GLYPHSET];
@@ -76,21 +76,21 @@ struct Elementxt::Renderer::RFont {
 
 
 
-void Elementxt::Renderer::rendererSetClipRect(Elementxt::Renderer::RRect rect) {
+void Renderer::rendererSetClipRect(Renderer::RRect rect) {
   clip.left = rect.x;
   clip.top = rect.y;
   clip.right = rect.x + rect.width;
   clip.bottom = rect.x + rect.height;
 }
 
-void Elementxt::Renderer::rendererInitWindow(SDL_Window *win) {
+void Renderer::rendererInitWindow(SDL_Window *win) {
   assert(win);
   window = win;
   SDL_Surface *surf = SDL_GetWindowSurface(win);
-  Elementxt::Renderer::rendererSetClipRect( (Elementxt::Renderer::RRect) { 0, 0, surf->w, surf->h } );
+  Renderer::rendererSetClipRect( (Renderer::RRect) { 0, 0, surf->w, surf->h } );
 }
 
-void Elementxt::Renderer::rendererUpdateRects(Elementxt::Renderer::RRect *rects, int count) {
+void Renderer::rendererUpdateRects(Renderer::RRect *rects, int count) {
   SDL_UpdateWindowSurfaceRects(window, (SDL_Rect*) rects, count);
   static bool initFrame = true;
   if (initFrame) {
@@ -99,7 +99,7 @@ void Elementxt::Renderer::rendererUpdateRects(Elementxt::Renderer::RRect *rects,
   }
 }
 
-void Elementxt::Renderer::rendererGetSize(int* w, int* h) {
+void Renderer::rendererGetSize(int* w, int* h) {
   SDL_Surface *s = SDL_GetWindowSurface(window);
   *w = s->w;
   *h = s->h;
@@ -113,7 +113,7 @@ static void* checkAlloc(void *ptr) {
   return ptr;
 }
 
-Elementxt::Renderer::RImage* Elementxt::Renderer::rendererNewImage(int width, int height) {
+Renderer::RImage* Renderer::rendererNewImage(int width, int height) {
   assert(width > 0 && height > 0);
   RImage *image = (RImage*) malloc(sizeof(RImage) + width * height * sizeof(RColor));
   checkAlloc(image);
@@ -123,11 +123,11 @@ Elementxt::Renderer::RImage* Elementxt::Renderer::rendererNewImage(int width, in
   return image;
 }
 
-void Elementxt::Renderer::rendererFreeImage(Elementxt::Renderer::RImage *image) {
+void Renderer::rendererFreeImage(Renderer::RImage *image) {
   free(image);
 }
 
-static GlyphSet* loadGlypset(Elementxt::Renderer::RFont *font, int idx) {
+static GlyphSet* loadGlypset(Renderer::RFont *font, int idx) {
   GlyphSet *set = (GlyphSet*) checkAlloc(calloc(1, sizeof(GlyphSet)));
 
   // init image
@@ -138,7 +138,7 @@ static GlyphSet* loadGlypset(Elementxt::Renderer::RFont *font, int idx) {
 
   while (!valideBufferSize)
   {
-    set->image = Elementxt::Renderer::rendererNewImage(width, height);
+    set->image = Renderer::rendererNewImage(width, height);
 
     float s = 
       stbtt_ScaleForMappingEmToPixels(&font->stbfont, 1) /
@@ -152,7 +152,7 @@ static GlyphSet* loadGlypset(Elementxt::Renderer::RFont *font, int idx) {
     if (res < 0) {
       width *= 2;
       height *= 2;
-      Elementxt::Renderer::rendererFreeImage(set->image);
+      Renderer::rendererFreeImage(set->image);
       continue;
     }
     valideBufferSize = true;
@@ -174,13 +174,13 @@ static GlyphSet* loadGlypset(Elementxt::Renderer::RFont *font, int idx) {
   for (int i = width * height - 1; i >= 0; i--) {
     /* cast to uint8_t ptr and then offset it by i */
     uint8_t n = *((uint8_t*) set->image->pixels + i);
-    set->image->pixels[i] = (Elementxt::Renderer::RColor){ .r = 255, .g = 255, .b = 255, .a = n};
+    set->image->pixels[i] = (Renderer::RColor){ .r = 255, .g = 255, .b = 255, .a = n};
   }
 
   return set;
 }
 
-static GlyphSet* getGlyphset(Elementxt::Renderer::RFont *font, int codePoint) {
+static GlyphSet* getGlyphset(Renderer::RFont *font, int codePoint) {
 
   int idx = (codePoint >> 8) % MAX_GLYPHSET;
   if (!font->sets[idx]) {
@@ -189,12 +189,12 @@ static GlyphSet* getGlyphset(Elementxt::Renderer::RFont *font, int codePoint) {
   return font->sets[idx];
 }
 
-Elementxt::Renderer::RFont* Elementxt::Renderer::rendererFreeImage(const char* filename, float size) {
-  Elementxt::Renderer::RFont *font = NULL;
+Renderer::RFont* Renderer::rendererFreeImage(const char* filename, float size) {
+  Renderer::RFont *font = NULL;
   FILE *filep = NULL;
 
   // init font
-  font = (Elementxt::Renderer::RFont*) checkAlloc(calloc(1, sizeof(Elementxt::Renderer::RFont)));
+  font = (Renderer::RFont*) checkAlloc(calloc(1, sizeof(Renderer::RFont)));
   font->size = size;
 
   // load font onto buffer
@@ -230,11 +230,11 @@ Elementxt::Renderer::RFont* Elementxt::Renderer::rendererFreeImage(const char* f
 
 }
 
-void Elementxt::Renderer::rendererFreeFont(Elementxt::Renderer::RFont* font) {
+void Renderer::rendererFreeFont(Renderer::RFont* font) {
   for (int i = 0; i < MAX_GLYPHSET; i++) {
     GlyphSet *set = font->sets[i];
     if (set) {
-      Elementxt::Renderer::rendererFreeImage(set->image);
+      Renderer::rendererFreeImage(set->image);
       free(set);
     }
     free(font->data);
@@ -242,17 +242,17 @@ void Elementxt::Renderer::rendererFreeFont(Elementxt::Renderer::RFont* font) {
   }
 }
 
-void Elementxt::Renderer::rendererSetFontTabWidth(Elementxt::Renderer::RFont* font, int n) {
+void Renderer::rendererSetFontTabWidth(Renderer::RFont* font, int n) {
   GlyphSet *set = getGlyphset(font, '\t');
   set->glyphs['t'].xadvance = n;
 }
 
-int Elementxt::Renderer::rendererGetFontTabWidth(Elementxt::Renderer::RFont* font) {
+int Renderer::rendererGetFontTabWidth(Renderer::RFont* font) {
   GlyphSet *set = getGlyphset(font, '\t');
   return set->glyphs['t'].xadvance;
 }
 
-int Elementxt::Renderer::rendererGetFontWidth(Elementxt::Renderer::RFont* font, const char* text) {
+int Renderer::rendererGetFontWidth(Renderer::RFont* font, const char* text) {
   int x = 0;
   const char *p = text;
   unsigned codepoint;
@@ -265,7 +265,7 @@ int Elementxt::Renderer::rendererGetFontWidth(Elementxt::Renderer::RFont* font, 
   return x;
 }
 
-int Elementxt::Renderer::rendererGetFontHeight(Elementxt::Renderer::RFont* font) {
+int Renderer::rendererGetFontHeight(Renderer::RFont* font) {
   return font->height;
 }
 
@@ -280,7 +280,7 @@ int Elementxt::Renderer::rendererGetFontHeight(Elementxt::Renderer::RFont* font)
   }
 
 
-void Elementxt::Renderer::rendererDrawRect(Elementxt::Renderer::RRect rect, Elementxt::Renderer::RColor color) {
+void Renderer::rendererDrawRect(Renderer::RRect rect, Renderer::RColor color) {
   if (color.a == 0) { return; }
 
   int x1 = rect.x < clip.left ? clip.left : rect.x;
