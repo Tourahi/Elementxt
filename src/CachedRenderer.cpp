@@ -119,22 +119,22 @@ static const char* utf8ToCodepoint(const char* p, unsigned  *dst) {
   return p + 1;
 }
 
-void showDebug (bool enable) {
+void CashedRenderer::showDebug (bool enable) {
   _showDebug = enable;
 }
 
 
-void freeFont (Renderer::RFont *font) {
+void CashedRenderer::freeFont (Renderer::RFont *font) {
   Command *cmd = pushCommand(FREE_FONT, sizeof(Command));
   if (cmd) { cmd->font = font; }
 }
 
-void setClipRect (Renderer::RRect rect) {
+void CashedRenderer::setClipRect (Renderer::RRect rect) {
   Command *cmd = pushCommand(SET_CLIP, sizeof(Command));
   if (cmd) { cmd->rect = intersectRects(rect, screenRect); }
 }
 
-void drawRect (Renderer::RRect rect, Renderer::RColor color) {
+void CashedRenderer::drawRect (Renderer::RRect rect, Renderer::RColor color) {
   if (!rectsOverlap(screenRect, rect)) { return; }
   Command *cmd = pushCommand(DRAW_RECT, sizeof(Command));
   if (cmd) {
@@ -143,7 +143,7 @@ void drawRect (Renderer::RRect rect, Renderer::RColor color) {
   }
 }
 
-int  drawText(Renderer::RFont *font, const char *text, int x, int y, Renderer::RColor color) {
+int  CashedRenderer::drawText(Renderer::RFont *font, const char *text, int x, int y, Renderer::RColor color) {
   Renderer::RRect rect;
   rect.x = x;
   rect.y = y;
@@ -165,11 +165,11 @@ int  drawText(Renderer::RFont *font, const char *text, int x, int y, Renderer::R
 }
 
 
-void invalidate(void) {
+void CashedRenderer::invalidate(void) {
   memset(cellsPrev, 0xff, sizeof(cellsBuf1));
 }
 
-void beginFrame(void) {
+void CashedRenderer::beginFrame(void) {
   int w, h;
   Renderer::rendererGetSize(&w, &h);
   if (screenRect.width != w || h != screenRect.height) {
@@ -207,7 +207,7 @@ static void pushRect(Renderer::RRect r, int *count) {
   rectBuf[(*count)++] = r;
 }
 
-void endFrame(void)  {
+void CashedRenderer::endFrame(void)  {
   /* Update cells from commands */ 
   Command *cmd = NULL;
   Renderer::RRect cr = screenRect;
