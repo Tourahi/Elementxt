@@ -3,7 +3,8 @@
 #include <ctype.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
+#include <cerrno>
 #include <sys/stat.h>
 
 #include "Api.hpp"
@@ -40,6 +41,129 @@ static const int cursorEnums[] = {
   SDL_SYSTEM_CURSOR_SIZENS,
   SDL_SYSTEM_CURSOR_HAND
 };
+
+
+static const char* button_name(int button) {
+  switch (button) {
+    case 1  : return "left";
+    case 2  : return "middle";
+    case 3  : return "right";
+    default : return "?";
+  }
+}
+
+static int fWaitEvent(lua_State *L) {
+  double n = luaL_checknumber(L, 1);
+  lua_pushboolean(L, SDL_WaitEventTimeout(NULL, n * 1000));
+  return 1;
+}
+
+static char* keyName(char *dst, int sym) {
+  strcpy(dst, SDL_GetKeyName(sym));
+  char *p = dst;
+  while(*p) {
+    *p = tolower(*p);
+    p++;
+  }
+  return dst;
+}
+
+static int fPollEvent(lua_State *L) {
+  char buf[16];
+  int mx, my, wx, wy;
+  SDL_Event e;
+  bool eventQ = true;
+
+  while(eventQ) {
+    if (!SDL_PollEvent(&e)) {
+      return 0;
+    }
+
+    switch(e.type) {
+      case SDL_QUIT:
+        lua_pushstring(L, "quit");
+        return 1;
+
+      case SDL_WINDOWEVENT:
+        if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+          lua_pushstring(L, "resized");
+          lua_pushnumber(L, e.window.data1);
+          lua_pushnumber(L, e.window.data2);
+          return 3;
+        } else if (e.window.event == SDL_WINDOWEVENT_EXPOSED) {
+          CashedRenderer::invalidate();
+          lua_pushstring(L, "exposed");
+          return 1;
+        }
+
+        if (e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
+         SDL_FlushEvent(SDL_KEYDOWN);
+        }
+        break;
+
+      case SDL_DROPFILE:
+        SDL_GetGlobalMouseState(&mx, &my);
+        SDL_GetWindowPosition(window, &wx, &wy);
+        lua_pushstring(L, "filedropped");
+        lua_pushstring(L, e.drop.file);
+        lua_pushnumber(L, mx - wx);
+        lua_pushnumber(L, my - wy);
+        SDL_free(e.drop.file);
+        return 4;
+
+      case SDL_KEYDOWN:
+        lua_pushstring(L, "keypressed");
+        lua_pushstring(L, keyName(buf, e.key.keysym.sym));
+        return 2;
+
+      case SDL_KEYUP:
+        lua_pushstring(L, "keyreleased");
+        lua_pushstring(L, keyName(buf, e.key.keysym.sym));
+        return 2;
+
+      case SDL_TEXTINPUT:
+        lua_pushstring(L, "textinput");
+        lua_pushstring(L, e.text.text);
+        return 2;
+
+      case SDL_MOUSEBUTTONDOWN:
+        if (e.button.button == 1) { SDL_CaptureMouse((SDL_bool) 1); }
+        lua_pushstring(L, "mousepressed");
+        lua_pushstring(L, button_name(e.button.button));
+        lua_pushnumber(L, e.button.x);
+        lua_pushnumber(L, e.button.y);
+        lua_pushnumber(L, e.button.clicks);
+        return 5;
+
+      case SDL_MOUSEBUTTONUP:
+        if (e.button.button == 1) { SDL_CaptureMouse((SDL_bool) 0); }
+        lua_pushstring(L, "mousereleased");
+        lua_pushstring(L, button_name(e.button.button));
+        lua_pushnumber(L, e.button.x);
+        lua_pushnumber(L, e.button.y);
+        return 4;
+
+      case SDL_MOUSEMOTION:
+        lua_pushstring(L, "mousemoved");
+        lua_pushnumber(L, e.motion.x);
+        lua_pushnumber(L, e.motion.y);
+        lua_pushnumber(L, e.motion.xrel);
+        lua_pushnumber(L, e.motion.yrel);
+        return 5;
+
+      case SDL_MOUSEWHEEL:
+        lua_pushstring(L, "mousewheel");
+        lua_pushnumber(L, e.wheel.y);
+        return 2;
+      
+      default:
+        break;
+    }
+
+  }
+
+  return 0;
+}
 
 static int fSetCursor(lua_State *L) {
   int opt = luaL_checkoption(L, 1, "arrow", cursorOpts);
