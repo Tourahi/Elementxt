@@ -4,7 +4,7 @@
 
 #include "tools/log.h"
 
-
+SDL_Window *window;
 
 int main(int argc, char const *argv[])
 {

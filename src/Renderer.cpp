@@ -189,7 +189,7 @@ static GlyphSet* getGlyphset(Renderer::RFont *font, int codePoint) {
   return font->sets[idx];
 }
 
-Renderer::RFont* Renderer::rendererFreeImage(const char* filename, float size) {
+Renderer::RFont* Renderer::rendererLoadFont(const char* filename, float size) {
   Renderer::RFont *font = NULL;
   FILE *filep = NULL;
 

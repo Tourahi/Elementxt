@@ -5,7 +5,7 @@
 static Renderer::RColor checkColor(lua_State *L, int idx, int def) {
   Renderer::RColor color;
   if (lua_isnoneornil(L, idx)) {
-    return (Renderer::RColor) { def, def, def, 255};
+    return (Renderer::RColor) { (uint8_t) def, (uint8_t) def, (uint8_t) def, 255};
   }
   lua_rawgeti(L, idx, 1);
   lua_rawgeti(L, idx, 2);
@@ -83,7 +83,7 @@ int luaopen_render_font(lua_State *L);
 
 int luaOpenSys(lua_State *L) {
   luaL_newlib(L, lib);
-  // TODO: Renderer
+  luaopen_render_font(L);
   lua_setfield(L, -2, "font");
   return 1;
 }

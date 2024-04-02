@@ -19,7 +19,7 @@ namespace Renderer
   void    rendererGetSize(int* w, int* h);
   RImage* rendererNewImage(int width, int height);
   void    rendererFreeImage(RImage *image);
-  RFont*  rendererFreeImage(const char* filename, float size);
+  RFont*  rendererLoadFont(const char* filename, float size);
   void    rendererFreeFont(RFont *font);
   void    rendererSetFontTabWidth(RFont *font, int n);
   int     rendererGetFontTabWidth(RFont *font);
