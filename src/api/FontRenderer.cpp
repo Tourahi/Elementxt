@@ -48,7 +48,7 @@ static const luaL_Reg lib[] = {
   { NULL, NULL }
 };
 
-int luaopen_render_font(lua_State *L) {
+int luaopenRendererFont(lua_State *L) {
   luaL_newmetatable(L, API_TYPE_FONT);
   luaL_setfuncs(L, lib, 0);
   lua_pushvalue(L, -1);

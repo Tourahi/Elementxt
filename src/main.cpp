@@ -16,8 +16,86 @@
 
 SDL_Window *window;
 
+static double getScale(void) {
+  float dpi;
+  SDL_GetDisplayDPI(0, NULL, &dpi, NULL);
+
+#if _WIN32
+  return dpi / 96.0;
+#else
+  return 1.0;
+#endif
+}
+static void getExeFilename(char *buf, int sz) {
+#if __lwpins32
+  int len = GetModuleFileName(NULL, buf, sz - 1);
+  buf[len] = '\0';
+#elif __linux__
+  char path[512];
+  sprintf(path, "/proc/%d/exe", getpid());
+  int len = readlink(path, buf, sz - 1);
+  buf[len] = '\0';
+#elif __APPLE__
+  unsigned size = sz;
+  _NSGetExecutablePath(buf, &size);
+#else
+  strcpy(buf, "./Elementxt");
+#endif
+
+}
+
+
 int main(int argc, char const *argv[])
 {
+#ifdef _WIN32
+  HINSTANCE lib = LoadLibrary("user32.dll");
+  int (*SetProcessDPIAware)() = (void*) GetProcAddress(lib, "SetProcessDPIAware");
+  SetProcessDPIAware();
+#endif
+
   logTrace("SDL INIT.");
-  return 0;
+
+  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+  SDL_EnableScreenSaver();
+  SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+  atexit(SDL_Quit);
+
+#ifdef SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR 
+  SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+#endif
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+  SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+#endif
+
+  SDL_DisplayMode dm;
+  SDL_GetCurrentDisplayMode(0, &dm);
+
+  logTrace("SDL CREATE WINDOW.");
+
+  // Todo: Some type of a setting file we read at the start that gives the user the ability to provide
+  // custom SDL flags and initial dims.
+  window = SDL_CreateWindow(
+    "", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, dm.w * 0.5, dm.h * 0.5,
+    SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_HIDDEN
+  );
+
+  Renderer::rendererInitWindow(window); // send the window to the renderer
+
+  logTrace("INIT LUA STATE.");
+
+  lua_State *L = luaL_newstate();
+  luaL_openlibs(L);
+  apiLoadLibs(L);
+
+  lua_newtable(L);
+  for (int i = 0; i < argc; i++) {
+    lua_pushstring(L, argv[i]);
+    lua_rawseti(L, -2, i + 1);
+  }
+  lua_setglobal(L, "ARGS");
+
+  lua_close(L);
+  SDL_DestroyWindow(window);
+
+  return EXIT_SUCCESS;
 }

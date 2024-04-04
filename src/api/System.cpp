@@ -400,7 +400,7 @@ static const luaL_Reg lib[] = {
 };
 
 
-int luaopen_system(lua_State *L) {
+int luaOpenSys(lua_State *L) {
   luaL_newlib(L, lib);
   return 1;
 }
