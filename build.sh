@@ -17,7 +17,7 @@ fi
 
 echo "compiling ($platform)..."
 echo "Moon files : "
-for f in `find data -name "*.moon"`; do
+for f in `find modules -name "*.moon"`; do
   $mcompiler $f
   if [[ $? -ne 0 ]]; then
     got_error=true

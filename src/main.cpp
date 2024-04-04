@@ -94,6 +94,42 @@ int main(int argc, char const *argv[])
   }
   lua_setglobal(L, "ARGS");
 
+
+  lua_pushstring(L, "0.0.0");
+  lua_setglobal(L, "VERSION");
+
+  lua_pushstring(L, SDL_GetPlatform());
+  lua_setglobal(L, "PLATFORM");
+
+  lua_pushnumber(L, getScale());
+  lua_setglobal(L, "SCALE");
+
+  char exename[2048];
+  getExeFilename(exename, sizeof(exename));
+  lua_pushstring(L, exename);
+  lua_setglobal(L, "EXEFILE");
+
+
+  (void) luaL_dostring(L,
+    "local core\n"
+    "xpcall(function()\n"
+    "  SCALE = tonumber(os.getenv(\"LITE_SCALE\")) or SCALE\n"
+    "  PATHSEP = package.config:sub(1, 1)\n"
+    "  print(EXEFILE, PATHSEP)\n"
+    "  EXEDIR = EXEFILE:match(\"^(.+)[/\\\\].*$\")\n"
+    "  package.path = EXEDIR .. '/modules/?.lua;' .. package.path\n"
+    "  package.path = EXEDIR .. '/modules/?/init.lua;' .. package.path\n"
+    "  core = require('core')\n"
+    "  print(core)\n"
+    "end, function(err)\n"
+    "  print('Error: ' .. tostring(err))\n"
+    "  print(debug.traceback(nil, 2))\n"
+    "  if core and core.on_error then\n"
+    "    pcall(core.on_error, err)\n"
+    "  end\n"
+    "  os.exit(1)\n"
+    "end)");
+
   lua_close(L);
   SDL_DestroyWindow(window);
 
