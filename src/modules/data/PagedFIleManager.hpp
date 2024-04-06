@@ -18,12 +18,15 @@
 #define FH_READ_FAILED    3
 #define FH_WRITE_FAILED   4
 
+#define PAGE_SIZE 4096
+
 
 namespace Data {
 
   typedef unsigned PageNum;
   typedef int Status;
   typedef char Byte;
+  
 
   class FileHandle;
 
@@ -58,12 +61,12 @@ namespace Data {
     unsigned writeCtr;
     unsigned appendCtr;
 
-    FileHandle() = default;
+    FileHandle();
     ~FileHandle();
 
     Status readPage(PageNum PageNum, void *data);
     Status writePage(PageNum PageNum, const void *data);
-    Status appendPage(void *data);
+    Status appendPage(const void *data);
     unsigned getNumberOfPages();
 
     friend class PagedFileManager;
@@ -73,7 +76,7 @@ namespace Data {
     FILE *_fd;
 
     void setfd(FILE *fd);
-    FILE *getFd();
+    FILE *getfd();
 
   };
 
