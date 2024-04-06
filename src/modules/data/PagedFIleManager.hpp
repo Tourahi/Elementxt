@@ -35,8 +35,8 @@ namespace Data {
 
     Status createFile(const std::string &fn);
     Status purgeFile(const std::string &fn);
-    Status openFile(const std::string &fn);
-    Status closeFile(const std::string &fn);
+    Status openFile(const std::string &fn, FileHandle &fileH);
+    Status closeFile(FileHandle &fileH);
 
   protected:
     PagedFileManager() = default;
@@ -46,6 +46,34 @@ namespace Data {
     static PagedFileManager *_pfm;
 
     bool fileExists(const std::string &fn);
+
+  };
+
+  class FileHandle
+  {
+
+  public:
+    
+    unsigned readCtr;
+    unsigned writeCtr;
+    unsigned appendCtr;
+
+    FileHandle() = default;
+    ~FileHandle();
+
+    Status readPage(PageNum PageNum, void *data);
+    Status writePage(PageNum PageNum, const void *data);
+    Status appendPage(void *data);
+    unsigned getNumberOfPages();
+
+    friend class PagedFileManager;
+
+  private:
+
+    FILE *_fd;
+
+    void setfd(FILE *fd);
+    FILE *getFd();
 
   };
 

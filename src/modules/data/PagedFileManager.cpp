@@ -51,3 +51,37 @@ Data::Status Data::PagedFileManager::purgeFile(const std::string &fn)
 
   return SUCCESS;
 }
+
+Data::Status Data::PagedFileManager::openFile(const std::string &fn, Data::FileHandle &fileH)
+{
+  if (fileH.getFd() != nullptr)
+    return PFM_HANDLE_IN_USE;
+
+  if (!fileExists(fn))
+    return PFM_FILE_DN_EXIST;
+
+  FILE *pFile;
+  pFile = fopen(fn.c_str(), "rb+");
+
+  if (pFile == nullptr)
+    return PFM_OPEN_FAILED;
+
+  fileH.setfd(pFile);
+
+  return SUCCESS;
+}
+
+
+Data::Status Data::PagedFileManager::closeFile(FileHandle &fileH)
+{
+  FILE *pFile = fileH.getFd();
+
+  if (pFile == nullptr)
+    return 1;
+
+  fclose(pFile);
+
+  fileH.setfd(nullptr);
+
+  return SUCCESS;
+}
