@@ -1,1 +1,0 @@
-return "HELLO FROM MOON"

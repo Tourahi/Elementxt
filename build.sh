@@ -49,5 +49,9 @@ echo "cleaning up..."
 # cleaning after cpp
 rm *.o
 rm res.res 2>/dev/null
-# cleaning after moon
-echo "done"
+
+if [ "$1" = "clean" ]; then
+  # cleaning after moon
+  find modules -type f -name '*.lua' -delete
+  echo "done" 
+fi
