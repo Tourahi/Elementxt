@@ -382,6 +382,11 @@ static int fFuzzyMatch(lua_State *L) {
   return 1;
 }
 
+static int testAlive(lua_State *L) {
+  logInfo("Test Alive");
+  return 0;
+}
+
 static const luaL_Reg lib[] = {
   { "setCursor",           fSetCursor          },
   { "setWindowTitle",    fSetWindowTitle    },
@@ -396,6 +401,7 @@ static const luaL_Reg lib[] = {
   { "sleep",               fSleep               },
   { "exec",                fExec                },
   { "fuzzyMatch",         fFuzzyMatch         },
+  { "testAlive",         testAlive         },
   { NULL, NULL }
 };
 

@@ -1,3 +1,3 @@
 
 
-return "HELLO FROM MOON"
+system.testAlive!
