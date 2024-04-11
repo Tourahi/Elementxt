@@ -1,5 +1,10 @@
 #!/bin/bash
 
+
+# LuaRocks deps 
+  # serpent (serializer)
+
+
 cflags="-Wall -O3 -g -std=gnu++11 -fno-strict-aliasing -Isrc"
 lflags="-lSDL2 -lm"
 
