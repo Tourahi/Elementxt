@@ -4,6 +4,30 @@ namespace Gui
 
 /* ==============================================================
  *
+ *                          HELPERS
+ *
+ * ===============================================================*/
+
+// delay to ensure proper token pasting while using ##
+#define GUI_STRING_JOIN_IMMEDIATE(arg1, arg2) arg1 ## arg2
+#define GUI_STRING_JOIN_DELAY(arg1, arg2) GUI_STRING_JOIN_IMMEDIATE(arg1, arg2)
+#define GUI_STRING_JOIN(arg1, arg2) GUI_STRING_JOIN_DELAY(arg1, arg2)
+
+#ifdef _MSC_VER
+  #define GUI_UNIQUE_NAME(name) GUI_STRING_JOIN(name, __COUNTER__)
+#else
+  #define GUI_UNIQUE_NAME(name) GUI_STRING_JOIN(name, __LINE__)
+#endif
+
+#ifndef GUI_STATIC_ASSERT
+  // The compiler will go creazy if the dummy array got a negative size.
+  #define GUI_STATIC_ASSERT(exp) typedef char GUI_UNIQUE_NAME(_dummy_arr)[(exp)? 1:-1]
+#endif
+
+
+
+/* ==============================================================
+ *
  *                          BASICS
  *
  * ===============================================================*/
@@ -86,6 +110,39 @@ namespace Gui
   #else
     #define GUI_BOOL int
   #endif
+#endif
+
+typedef GUI_INT8    guiChar;
+typedef GUI_UINT8   guiuChar;
+typedef GUI_UINT8   guiByte;
+typedef GUI_INT16   guiShort;
+typedef GUI_UINT16  guiuShort;
+typedef GUI_INT32   guiInt;
+typedef GUI_UINT32  guiuInt;
+
+typedef GUI_SIZE_TYPE    guiSize;
+typedef GUI_POINTER_TYPE guiPtr;
+typedef GUI_BOOL         guiBool;
+
+typedef guiuInt guiHash;
+typedef guiuInt guiFlags;
+typedef guiuInt guiRune; // unicode
+
+/* Asserts  */
+GUI_STATIC_ASSERT(sizeof(guiShort) == 2);
+GUI_STATIC_ASSERT(sizeof(guiuShort) == 2);
+GUI_STATIC_ASSERT(sizeof(guiuInt) == 4);
+GUI_STATIC_ASSERT(sizeof(guiInt) == 4);
+GUI_STATIC_ASSERT(sizeof(guiByte) == 1);
+GUI_STATIC_ASSERT(sizeof(guiFlags) == 4);
+GUI_STATIC_ASSERT(sizeof(guiRune) == 4);
+GUI_STATIC_ASSERT(sizeof(guiSize) >= sizeof(void*));
+GUI_STATIC_ASSERT(sizeof(guiPtr) >= sizeof(void*));
+
+#ifdef GUI_INCLUDE_STANDARD_BOOL
+GUI_STATIC_ASSERT(sizeof(guiBool) == sizeof(bool));
+#else
+GUI_STATIC_ASSERT(sizeof(guiBool) >= 2);
 #endif
 
 
