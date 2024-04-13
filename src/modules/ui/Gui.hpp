@@ -1,6 +1,5 @@
+#pragma once
 
-namespace Gui
-{
 
 /* ==============================================================
  *
@@ -24,13 +23,40 @@ namespace Gui
   #define GUI_STATIC_ASSERT(exp) typedef char GUI_UNIQUE_NAME(_dummy_arr)[(exp)? 1:-1]
 #endif
 
-
+#ifndef GUI_ASSERT
+#include <cassert>
+#define GUI_ASSERT(exp) assert(exp)
+#endif
 
 /* ==============================================================
  *
  *                          BASICS
  *
  * ===============================================================*/
+
+#ifndef GUI_API
+  #ifdef GUI_PRIVATE
+    #if (defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199409L))
+      #define GUI_API static inline
+    #elif defined(__cplusplus)
+      #define GUI_API static inline
+    #else
+      #define GUI_API static
+    #endif
+  #else
+    #define GUI_API extern
+  #endif
+#endif
+
+#ifndef GUI_LIB
+  #ifdef GUI_SINGLE_FILE
+    #define GUI_LIB static
+  #else
+    #define GUI_LIB extern
+  #endif
+#endif
+
+
 
 #ifdef GUI_INCLUDE_FIXED_TYPES
   #include <cstdint>
@@ -219,5 +245,7 @@ struct guiBuffer {
 };
 
 
+/*GUI_API void guiBufferInit(struct guiBuffer*, const struct guiAllocator*, guiSize size);
+GUI_API void guiBufferInitFixed(struct guiBuffer*, void *memory, guiSize size);
 
-}
+*/

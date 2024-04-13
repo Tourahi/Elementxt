@@ -5,6 +5,14 @@
   # serpent (serializer)
 
 
+if [ "$1" = "reset" ]; then
+  # cleaning after moon
+  find modules -type f -name '*.lua' -delete
+  echo "done"
+  exit 1
+fi
+
+
 cflags="-Wall -O3 -g -std=gnu++11 -fno-strict-aliasing -Isrc"
 lflags="-lSDL2 -lm"
 
