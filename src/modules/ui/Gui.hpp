@@ -146,4 +146,78 @@ GUI_STATIC_ASSERT(sizeof(guiBool) >= 2);
 #endif
 
 
+
+/* ==============================================================
+ *
+ *                          API
+ *
+ * ===============================================================*/
+
+typedef union { void *ptr; int id; } guiHandle;
+typedef void*(*guiPluginAlloc)(guiHandle, void *old, guiSize);
+typedef void(*guiPluginFree)(guiHandle, void *old);
+
+
+struct guiAllocator {
+  guiHandle userdata;
+  guiPluginAlloc alloc;
+  guiPluginFree free;
+};
+
+
+
+/* ==============================================================
+ *
+ *                          MEM BUFFER
+ *
+ * ===============================================================*/
+
+struct guiMemoryStatus {
+  void *memory;
+  unsigned int type;
+  guiSize size;
+  guiSize allocated;
+  guiSize needed;
+  guiSize calls;
+};
+
+// trNote : make them clas enums??
+enum guiAllocationType {
+  GUI_BUFFER_FIXED, // fixed size buffer
+  GUI_BUFFER_DYNAMIC // dynamic size buffer
+};
+
+enum guiBufferAllocationType {
+  GUI_BUFFER_FRONT,
+  GUI_BUFFER_BACK,
+  GUI_BUFFER_MAX
+};
+
+struct guiBufferMaker {
+  guiBool active;
+  guiSize offset;
+};
+
+struct guiMemory
+{
+  void *ptr;
+  guiSize size; // trNote : 32bits in my case
+};
+
+struct guiBuffer {
+  
+  struct guiBufferMaker maker[GUI_BUFFER_MAX]; // To free a buffer to a certain offset
+  struct guiAllocator pool; // allocator callback for dynmc buffers
+  enum guiAllocationType type; // mem management type
+  struct guiMemory memory; // mem and size of the current mem block
+  double growFactor; // for dynamic mem management
+  guiSize allocated; // total currently allocated
+  guiSize needed; // totally consumed memory given that enough memory is present
+  guiSize calls; // nbr of alloc calls
+  guiSize size; // current size of the buffer
+  
+};
+
+
+
 }

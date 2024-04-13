@@ -21,6 +21,7 @@ with signal = {}
     handlers[name] = handlers[name] or {}
     handlers[name]
 
+
   
   .connect = (name, handler, index) ->
     error "Unknown signal '#{name}'", 2 unless all[name]
@@ -49,4 +50,3 @@ with signal = {}
         -- TODO LOG ERR
         error "TODO SIGNAL ERR"
     false
-
