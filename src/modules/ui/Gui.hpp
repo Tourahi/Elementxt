@@ -245,3 +245,13 @@ struct guiBuffer {
 GUI_API void guiBufferInitFixed(struct guiBuffer*, void *memory, guiSize size);
 
 */
+
+
+
+/* ==============================================================
+ *                          ALIGNMENT
+ * =============================================================== */
+
+#if defined(__PTRDIFF_TYPE__)
+# define GUI_PTR_TO_UINT(x) ((guiSize)(__PTRDIFF_TYPE__)(x))
+#endif
