@@ -14,15 +14,15 @@ UTEST(GUI, guiChar) { ASSERT_EQ(sizeof(guiChar), 1); }
 UTEST(GUI, guiMemset) {
 	struct smtg {
 		int x;
-		int y;
 	};
 
 	smtg conf;
 
-	guiMemset(&conf, 0, sizeof(conf));
+	guiMemset(&conf, 1, 2);
 
-	ASSERT_EQ(conf.x, 0);
-	ASSERT_EQ(conf.y, 0);
+	// should look like this
+	// 257 -> 00000000 00000000 00000001 00000001
+	ASSERT_EQ(conf.x, 257);
 }
 
 #endif

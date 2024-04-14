@@ -1,8 +1,6 @@
 #include "Gui.hpp"
 #include "GuiInternal.hpp"
 
-
-
 GUI_LIB void guiMemset(void *ptr, int c0, guiSize size)
 {
 
