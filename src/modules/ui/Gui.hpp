@@ -23,10 +23,6 @@
   #define GUI_STATIC_ASSERT(exp) typedef char GUI_UNIQUE_NAME(_dummy_arr)[(exp)? 1:-1]
 #endif
 
-#ifndef GUI_ASSERT
-#include <cassert>
-#define GUI_ASSERT(exp) assert(exp)
-#endif
 
 /* ==============================================================
  *

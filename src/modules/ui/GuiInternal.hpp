@@ -8,3 +8,4 @@
 
 
 GUI_LIB void guiZero(void *ptr, guiSize size);
+GUI_LIB void guiMemset(void *ptr, int c0, guiSize size);

@@ -1,10 +1,15 @@
+#include "Build.hpp"
+
 #include <cstdio>
 #include <SDL2/SDL.h>
+
+#include "Renderer.hpp"
 
 #include "Renderer.hpp"
 #include "api/Api.hpp"
 
 #include "tools/log.h"
+#include "tools/utest.h"
 
 #ifdef _WIN32
   #include <windows.h>
@@ -12,6 +17,10 @@
   #include <unistd.h>
 #elif __APPLE__
   #include <mach-o/dyld.h>
+#endif
+
+#ifdef RUN_TESTS
+  UTEST_STATE();
 #endif
 
 SDL_Window *window;
@@ -133,5 +142,9 @@ int main(int argc, char const *argv[])
   lua_close(L);
   SDL_DestroyWindow(window);
 
+#ifdef RUN_TESTS
+  return utest_main(argc, argv);
+#else
   return EXIT_SUCCESS;
+#endif
 }

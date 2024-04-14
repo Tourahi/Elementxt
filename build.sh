@@ -5,7 +5,7 @@
   # serpent (serializer)
 
 
-if [ "$1" = "reset" ]; then
+if [ "$1" = "push" ]; then
   # cleaning after moon
   find modules -type f -name '*.lua' -delete
   echo "done"
