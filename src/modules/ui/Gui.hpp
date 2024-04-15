@@ -241,10 +241,11 @@ struct guiBuffer {
 };
 
 
-/*GUI_API void guiBufferInit(struct guiBuffer*, const struct guiAllocator*, guiSize size);
+GUI_API void guiBufferInit(struct guiBuffer*, const struct guiAllocator*, guiSize size);
 GUI_API void guiBufferInitFixed(struct guiBuffer*, void *memory, guiSize size);
+GUI_API void guiBufferInfo(struct guiMemoryStatus*, void *memory, struct guiBuffer*);
 
-*/
+
 
 
 
@@ -254,4 +255,21 @@ GUI_API void guiBufferInitFixed(struct guiBuffer*, void *memory, guiSize size);
 
 #if defined(__PTRDIFF_TYPE__)
 # define GUI_PTR_TO_UINT(x) ((guiSize)(__PTRDIFF_TYPE__)(x))
+# define GUI_UINT_TO_PTR(x) ((void*)(__PTRDIFF_TYPE__)(x))
+#elif !defined(__GNUC__)
+# define GUI_UINT_TO_PTR(x) ((void*)&((char*)0)[x])
+# define GUI_PTR_TO_UINT(x) ((guiSize)(((char*)x)-(char*)0))
+#elif !defined(GUI_INCLUDE_FIXED_TYPES)
+# define GUI_UINT_TO_PTR(x) ((void*)(uintptr_t)(x))
+# define GUI_PTR_TO_UINT(x) ((uintptr_t)(x))
+#else
+# define GUI_UINT_TO_PTR(x) ((void*)(x))
+# define GUI_PTR_TO_UINT(x) ((guiSize)(x))
 #endif
+
+
+/* ==============================================================
+ *                          MATH
+ * =============================================================== */
+
+#define guiPtrAdd(t, p, i) ((t*)((void*)((guiByte*)(p) + (i))))

@@ -1,6 +1,10 @@
 #include "Gui.hpp"
 #include "GuiInternal.hpp"
 
+
+#ifndef GUI_MEMSET
+#define GUI_MEMSET guiMemset
+
 GUI_LIB void guiMemset(void *ptr, int c0, guiSize size)
 {
 
@@ -54,13 +58,12 @@ GUI_LIB void guiMemset(void *ptr, int c0, guiSize size)
 	#undef guiWsize
 	#undef guiWmask
 }
-
-
+#endif
 
 GUI_LIB void guiZero(void *ptr, guiSize size)
 {
 	GUI_ASSERT(ptr);
-
+	GUI_MEMSET(ptr, 0, size);
 }
 
 
