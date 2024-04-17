@@ -14,7 +14,7 @@
 #ifdef _WIN32
   #include <windows.h>
 #elif __linux__
-  #include <unistd.h>
+  #include <unistd.h>*
 #elif __APPLE__
   #include <mach-o/dyld.h>
 #endif
@@ -93,6 +93,7 @@ int main(int argc, char const *argv[])
   logTrace("INIT LUA STATE.");
 
   lua_State *L = luaL_newstate();
+  
   luaL_openlibs(L);
   apiLoadLibs(L);
 

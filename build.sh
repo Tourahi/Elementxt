@@ -1,10 +1,6 @@
 #!/bin/bash
 
 
-# LuaRocks deps 
-  # serpent (serializer)
-
-
 if [ "$1" = "push" ]; then
   # cleaning after moon
   find modules -type f -name '*.lua' -delete
@@ -26,6 +22,7 @@ lflags="$lflags -o $out"
 
 if command -v ccache >/dev/null; then
   compiler="ccache $compiler"
+  mcompiler="ccache $mcompiler"
 fi
 
 echo "compiling ($platform)..."

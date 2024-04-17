@@ -12,6 +12,7 @@ GUI_LIB void guiMemset(void *ptr, int c0, guiSize size)
 	#define guiWsize sizeof(guiWord)
 	#define guiWmask (guiWsize - 1)
 
+
 	guiByte *dst = (guiByte*) ptr;
 	unsigned c = 0;
 	guiSize t = 0;

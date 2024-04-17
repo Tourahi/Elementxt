@@ -52,7 +52,7 @@ GUI_API void guiBufferInfo(struct guiMemoryStatus *s, void *memory, struct guiBu
 	s->calls = b->calls;
 }
 
-GUI_LIB void* nk_buffer_align(void *unaligned, guiSize align, guiSize *alignment, enum guiBufferAllocationType type)
+GUI_LIB void* guiBufferAlign(void *unaligned, guiSize align, guiSize *alignment, enum guiBufferAllocationType type)
 {
 	
 }
@@ -66,6 +66,12 @@ GUI_LIB void* guiBufferAlloc(struct guiBuffer *b, enum guiBufferAllocationType t
 
 	GUI_ASSERT(b);
 	GUI_ASSERT(size);
+
+	if (!b || !size) return 0;
+	b->needed += size;
+
+	
+
 
 
 

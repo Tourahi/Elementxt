@@ -267,6 +267,11 @@ GUI_API void guiBufferInfo(struct guiMemoryStatus*, void *memory, struct guiBuff
 # define GUI_PTR_TO_UINT(x) ((guiSize)(x))
 #endif
 
+#define GUI_ALIGN_PTR(x, mask)\
+  (GUI_UINT_TO_PTR((GUI_PTR_TO_UINT((guiByte*)(x) + (mask-1)) & ~(mask-1))))
+
+#define GUI_ALIGN_PTR_BACK(x, mask)\
+  (GUI_UINT_TO_PTR((GUI_PTR_TO_UINT((guiByte*)(x)) & ~(mask-1))))
 
 /* ==============================================================
  *                          MATH
