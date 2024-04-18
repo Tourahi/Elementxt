@@ -273,6 +273,13 @@ GUI_API void guiBufferInfo(struct guiMemoryStatus*, void *memory, struct guiBuff
 #define GUI_ALIGN_PTR_BACK(x, mask)\
   (GUI_UINT_TO_PTR((GUI_PTR_TO_UINT((guiByte*)(x)) & ~(mask-1))))
 
+#if (defined(__GNUC__) && __GNUC__ >= 4) || defined(__clang__)
+#define GUI_OFFSETOF(st, m) (__builtin_offsetof(st, m))
+#else
+#define GUI_OFFSETOF(st, m) ((guiPtr)&(((st*)0)->m))
+#endif
+
+
 /* ==============================================================
  *                          MATH
  * =============================================================== */

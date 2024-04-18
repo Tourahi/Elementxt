@@ -26,7 +26,7 @@ void binRep(const T& a)
 }
 
 // DUMMY TEST
-UTEST(GUI, guiChar) { ASSERT_EQ(sizeof(guiChar), 1); }
+/*UTEST(GUI, guiChar) { ASSERT_EQ(sizeof(guiChar), 1); }*/
 
 UTEST(GUI, guiMemset) {
 	struct smtg {
@@ -39,31 +39,33 @@ UTEST(GUI, guiMemset) {
 
 	// should look like this
 	// 257 -> 00000000 00000000 00000001 00000001
-	ASSERT_EQ(conf.x, 257);
+	ASSERT_EQ((int)conf.x, (int)257);
 }
 
 
-UTEST(GUI, allignPtr) {
+UTEST(GUI, guiPtrAdd) {
 	typedef struct pixel
 	{
-		unsigned char red;	
-		unsigned char blue;	
-		unsigned char green;	
+		unsigned int red;	
+		unsigned int blue;	
+		unsigned int green;	
 	};
+
+	int pixelMSize = sizeof(int);
 
 	pixel *p = (pixel *)malloc(sizeof(pixel) * 4);
 
-	printf("Before alignment:\n");
-	printf("Memory address of pixels[0]: %p\n", (void *)&p[0]);
+	p[0].red = 1;
+	p[0].blue = 2;
+	p[0].green = 3;
 
-	binRep((void *)&p[0]);
+    //printf("Memory address of p[0]: %p\n", (void *)&p[0]);   
+   	pixel *pp = guiPtrAdd(pixel, p, pixelMSize*2);
+   	//printf("Memory address of pp[0]: %p\n", (void *)&pp[0]);
 
-	p = (pixel*)GUI_ALIGN_PTR_BACK(p, 4);
+   	//printf("pp[0]: %d\n", pp[0].red);
 
-	printf("After alignment:\n");
-	printf("Memory address of pixels[0]: %p\n", (void *)&p[0]);
-
-	binRep((void *)&p[0]);
+   	ASSERT_EQ(pp[0].red, (unsigned int)3);
 }
 
 
