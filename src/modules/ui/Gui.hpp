@@ -279,6 +279,34 @@ GUI_API void guiBufferInfo(struct guiMemoryStatus*, void *memory, struct guiBuff
 #define GUI_OFFSETOF(st, m) ((guiPtr)&(((st*)0)->m))
 #endif
 
+#ifdef __cplusplus
+
+template<typename T> struct guiAlignOf;
+
+template<typename T, int sizeDiff>
+struct guiHelperAlign {
+  enum {value = sizeDiff};
+};
+
+// specialized guiHelperAlign in case of sizeDif == 0
+template<typename T>
+struct guiHelperAlign<T, 0> {
+  enum {value = guiAlignOf<T>::value};
+};
+
+
+template<typename T> struct guiAlignOf {
+  struct Big {T x; char c;}; 
+  enum {
+    diff = sizeof(Big) - sizeof(T), value = guiHelperAlign<Big, diff>::value
+  };
+};
+
+#define GUI_ALIGNOF(t) (guiAlignOf<t>::value)
+#else
+#define GUI_ALIGNOF(t) GUI_OFFSETOF(struct {char c; t _h;}, _h)
+#endif
+
 
 /* ==============================================================
  *                          MATH

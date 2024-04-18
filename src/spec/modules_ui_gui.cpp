@@ -69,5 +69,20 @@ UTEST(GUI, guiPtrAdd) {
 }
 
 
+UTEST(GUI, GUI_ALIGNOF) {
+	struct point {
+		int x;
+		int y;
+		long long v;
+	};
+
+	ASSERT_EQ(GUI_ALIGNOF(int), (int)4);
+	ASSERT_EQ(GUI_ALIGNOF(char), (int)1);
+	// sould be the biggest type in te struct point
+	ASSERT_EQ(GUI_ALIGNOF(point), (int)8);
+}
+
+
+
 
 #endif
