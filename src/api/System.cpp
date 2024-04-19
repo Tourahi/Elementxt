@@ -1,4 +1,4 @@
-#include <SDL2/SDL.h>
+/*#include <SDL2/SDL.h>
 #include <cstdbool>
 #include <ctype.h>
 #include <dirent.h>
@@ -409,4 +409,4 @@ static const luaL_Reg lib[] = {
 int luaOpenSys(lua_State *L) {
   luaL_newlib(L, lib);
   return 1;
-}
+}*/

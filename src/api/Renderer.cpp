@@ -1,4 +1,4 @@
-#include "Api.hpp"
+/*#include "Api.hpp"
 #include "Renderer.hpp"
 #include "CachedRenderer.hpp"
 
@@ -87,3 +87,4 @@ int luaOpenRenderer(lua_State *L) {
   lua_setfield(L, -2, "font");
   return 1;
 }
+*/

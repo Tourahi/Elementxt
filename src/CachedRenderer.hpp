@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include "Renderer.hpp"
 
@@ -15,4 +15,4 @@ namespace CashedRenderer {
   void beginFrame(void);
   void endFrame(void);
 
-}
+}*/

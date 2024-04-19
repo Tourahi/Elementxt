@@ -3,9 +3,9 @@
 #include <cassert>
 #include <cmath>
 
-#include "lib/stb/stb_truetype.h"
+#include "../src/lib/stb/stb_truetype.h"
 
-#include "Renderer.hpp"
+#include "r.hpp"
 
 #define MAX_GLYPHSET 256
 
