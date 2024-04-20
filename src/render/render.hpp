@@ -5,43 +5,99 @@
 #include <cstdint>
 
 
-class RPoint
+class RRect
 {
 
 public:
-	R_DECL_CONSTEXPR RPoint();
-	R_DECL_CONSTEXPR RPoint(int xpos, ypos);
+	R_DECL_CONSTEXPR RRect();
+	R_DECL_CONSTEXPR RRect(int xpos, int ypos, int w, int h);
 
 	R_DECL_CONSTEXPR inline bool isNull() const;
 
 	R_DECL_CONSTEXPR inline int x() const;
 	R_DECL_CONSTEXPR inline int y() const;
+
+	R_DECL_CONSTEXPR inline int width() const;
+	R_DECL_CONSTEXPR inline int height() const;
+
+
 	inline void setX(int);
 	inline void setY(int);
+	inline void setWidth(int);
+	inline void setHeight(int);
 
-	R_DECL_CONSTEXPR RPoint transposed() const noexcept { return {yp, xp}; }
+	R_DECL_CONSTEXPR RRect transposed() const noexcept { return {yp, xp, rwidth, rheight}; }
 
 	// returns ref to members
-	R_DECL_CONSTEXPR inline int &xr();
-	R_DECL_CONSTEXPR inline int &yr();
+	inline int &xr();
+	inline int &yr();
+	inline int &width();
+	inline int &height();
 
-	inline RPoint &operator+=(const RPoint&);
-	inline RPoint &operator-=(const RPoint&);
+	inline RRect &operator+=(const RRect&);
+	inline RRect &operator-=(const RRect&);
 
-	inline RPoint &operator*=(float);
-	inline RPoint &operator*=(double);
-	inline RPoint &operator*=(int);
+	inline RRect &operator*=(float);
+	inline RRect &operator*=(double);
+	inline RRect &operator*=(int);
 
-	inline RPoint &operator/=(double);
+	inline RRect &operator/=(double);
 
 
-	R_DECL_CONSTEXPR static inline int dotProd(const RPoint &p1, const RPoint &p2)
+	R_DECL_CONSTEXPR static inline int dotProd(const RRect &p1, const RRect &p2)
 	{ return p1.xp * p2.xp + p1.yp * p2.yp; }
 
 
 private:
 	int xp;
 	int yp;
-	int width;
-	int height;
+	int rwidth;
+	int rheight;
 };
+
+
+
+/* ==============================================================
+ *                   RRect inline functions 
+ * ===============================================================*/
+
+R_DECL_CONSTEXPR inline RRect::RRect() : xp(0), yp(0), rwidth(0), rheight(0) {}
+R_DECL_CONSTEXPR inline RRect::RRect(int xpos, int ypos, int w, int h) : xp(xpos), yp(ypos), rwidth(w), rheight(h) {}
+
+R_DECL_CONSTEXPR inline bool RRect::isNull() const 
+{ return xp == 0 && yp == 0 && rwidth == 0 && rheight == 0; }
+
+R_DECL_CONSTEXPR inline int RRect::x() const
+{ return xp; }
+
+R_DECL_CONSTEXPR inline int RRect::y() const
+{ return yp; }
+
+R_DECL_CONSTEXPR inline int RRect::width() const
+{ return rwidth; }
+
+R_DECL_CONSTEXPR inline int RRect::height() const
+{ return rheight; }
+
+
+inline void RRect::setX(int x)
+{ xp = x; }
+
+inline void RRect::setY(int y)
+{ yp = y; }
+
+inline void RRect::setWidth(int w)
+{ rwidth = w; }
+
+inline void RRect::setHeight(int h)
+{ rheight = h; }
+
+
+inline int &RRect::xr()
+{ return xp; }
+
+inline int &RRect::yr()
+{ return yp; }
+
+
+

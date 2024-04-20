@@ -4,9 +4,9 @@
 #include <SDL2/SDL.h>
 
 /*#include "Renderer.hpp"
-
-#include "Renderer.hpp"
 */
+#include "render/render.hpp"
+
 
 #include "api/Api.hpp"
 
