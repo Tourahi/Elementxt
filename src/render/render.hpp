@@ -5,6 +5,9 @@
 #include <cstdint>
 
 
+
+typedef struct { uint8_t r, g, b, a; } RColor;
+
 class RRect
 {
 
@@ -31,18 +34,11 @@ public:
 	// returns ref to members
 	inline int &xr();
 	inline int &yr();
-	inline int &width();
-	inline int &height();
+	inline int &widthr();
+	inline int &heightr();
 
 	inline RRect &operator+=(const RRect&);
 	inline RRect &operator-=(const RRect&);
-
-	inline RRect &operator*=(float);
-	inline RRect &operator*=(double);
-	inline RRect &operator*=(int);
-
-	inline RRect &operator/=(double);
-
 
 	R_DECL_CONSTEXPR static inline int dotProd(const RRect &p1, const RRect &p2)
 	{ return p1.xp * p2.xp + p1.yp * p2.yp; }
@@ -100,4 +96,30 @@ inline int &RRect::yr()
 { return yp; }
 
 
+inline int &RRect::widthr()
+{ return rwidth; }
 
+inline int &RRect::heightr()
+{ return rheight; }
+
+
+inline RRect &operator+=(const RRect &p)
+{ xp+=p.xp; yp+=p.yp; return *this; }
+
+inline RRect &operator-=(const RRect &p)
+{ xp-=p.xp; yp-=p.yp; return *this; }
+
+
+/* ==============================================================
+ *                   			Image - Font (Def: render.cpp)
+ * ===============================================================*/
+typedef struct RImage;
+typedef struct RFont;
+
+
+/* ==============================================================
+ *                   			Render Functions (Def: render.cpp)
+ * ===============================================================*/
+
+
+// TODO
