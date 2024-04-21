@@ -122,6 +122,7 @@ typedef struct RFont;
 
 void 	renderSetClipRect(RRect rect);
 void 	renderInitSDLWindow(SDL_Window *win);
+void 	renderGetSize(int* w, int* h);
 
 
 
