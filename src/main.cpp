@@ -3,8 +3,6 @@
 #include <cstdio>
 #include <SDL2/SDL.h>
 
-/*#include "Renderer.hpp"
-*/
 #include "render/render.hpp"
 
 
