@@ -3,9 +3,9 @@
 #include <cstdio>
 #include <SDL2/SDL.h>
 
-#include "Renderer.hpp"
+#include "render/render.hpp"
 
-#include "Renderer.hpp"
+
 #include "api/Api.hpp"
 
 #include "tools/log.h"
@@ -88,7 +88,7 @@ int main(int argc, char const *argv[])
     SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_HIDDEN
   );
 
-  Renderer::rendererInitWindow(window); // send the window to the renderer
+  //Renderer::rendererInitWindow(window); // send the window to the renderer
 
   logTrace("INIT LUA STATE.");
 
