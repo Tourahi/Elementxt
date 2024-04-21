@@ -103,10 +103,10 @@ inline int &RRect::heightr()
 { return rheight; }
 
 
-inline RRect &operator+=(const RRect &p)
+inline RRect &RRect::operator+=(const RRect &p)
 { xp+=p.xp; yp+=p.yp; return *this; }
 
-inline RRect &operator-=(const RRect &p)
+inline RRect &RRect::operator-=(const RRect &p)
 { xp-=p.xp; yp-=p.yp; return *this; }
 
 
@@ -116,10 +116,16 @@ inline RRect &operator-=(const RRect &p)
 typedef struct RImage;
 typedef struct RFont;
 
-
 /* ==============================================================
  *                   			Render Functions (Def: render.cpp)
  * ===============================================================*/
 
+void 	renderSetClipRect(RRect rect);
+void 	renderInitSDLWindow(SDL_Window *win);
 
-// TODO
+
+
+
+// Spec stuff (will be removed in the release versions)
+RRect renderGetClipDims();
+
