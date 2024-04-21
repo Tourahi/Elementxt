@@ -25,14 +25,14 @@ if command -v ccache >/dev/null; then
   mcompiler="ccache $mcompiler"
 fi
 
-# echo "compiling ($platform)..."
-# echo "Moon files : "
-# for f in `find modules -name "*.moon"`; do
-#   $mcompiler $f
-#   if [[ $? -ne 0 ]]; then
-#     got_error=true
-#   fi
-# done
+echo "compiling ($platform)..."
+echo "Moon files : "
+for f in `find modules -name "*.moon"`; do
+  $mcompiler $f
+  if [[ $? -ne 0 ]]; then
+    got_error=true
+  fi
+done
 
 echo "C files : "
 for f in `find src -name "*.c"`; do
