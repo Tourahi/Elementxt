@@ -2,6 +2,9 @@
 #include "rcompiler.hpp"
 
 #include "../lib/stb/stb_truetype.h"
+#include <SDL2/SDL_surface.h>
+#include <cstdlib>
+#include "../tools/log.h"
 
 
 #define MAX_GLYPHSET 256
@@ -83,6 +86,21 @@ static inline RColor blendPixel2(RColor dst, RColor src, RColor color)
   return dst;
 }
 
+static void* checkAlloc(void *ptr)
+{
+	if (!ptr) {
+		logFatal("memory allocation failed");
+		exit(EXIT_FAILURE);
+	}
+	return ptr;
+}
+
+static GlyphSet* getGlyphset(RFont *font, int codepoint)
+{
+
+}
+
+
 // End-Static
 
 
@@ -106,4 +124,29 @@ void renderInitSDLWindow(SDL_Window *win)
 	RENDER_ASSERT(win);
 	SDL_Surface *s = SDL_GetWindowSurface(win);
 	renderSetClipRect({0,0,s->w, s->h});
+}
+
+
+void 	renderGetSize(int* w, int* h)
+{
+	SDL_Surface *s = SDL_GetWindowSurface(window);
+	*w = s->w;
+	*h = s->h;
+}
+
+
+void renderNewImage(int width, int height)
+{
+	assert(width > 0 && height > 0);
+	RImage *image = (RImage*) malloc(sizeof(RImage) + width * height * sizeof(RColor));
+	checkAlloc(image);
+	image->pixels = (RColor*) (image + 1);
+	image->width = width;
+	image->height = height;
+}
+
+
+void renderSetFontTabWidth(RFont* font, int n)
+{
+
 }

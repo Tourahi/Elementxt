@@ -19,7 +19,7 @@ const int SCREEN_HEIGHT = 480;
 SDL_Window* gWindow = NULL;
 	
 
-bool init()
+static bool init()
 {
 	//Initialization flag
 	bool success = true;
@@ -50,7 +50,7 @@ bool init()
 }
 
 
-void close()
+static void close()
 {
 	//Destroy window
 	SDL_DestroyWindow( gWindow );
@@ -61,7 +61,7 @@ void close()
 }
 
 
-void keepWindow()
+static void keepWindow()
 {
 #ifdef SPEC_KEEP_SDL_WIN
 	// Hack 
