@@ -124,7 +124,8 @@ void 	renderSetClipRect(RRect rect);
 void 	renderInitSDLWindow(SDL_Window *win);
 void 	renderGetSize(int* w, int* h);
 
-void renderNewImage(int width, int height);
+RImage* renderNewImage(int width, int height);
+void renderFreeImage(RImage* image);
 
 void renderSetFontTabWidth(RFont* font, int n);
 

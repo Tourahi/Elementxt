@@ -8,6 +8,8 @@
 
 
 #define MAX_GLYPHSET 256
+#define INIT_IMAGE_WIDTH 128
+#define INIT_IMAGE_HEIGHT 128
 
 // Structs
 
@@ -135,7 +137,7 @@ void 	renderGetSize(int* w, int* h)
 }
 
 
-void renderNewImage(int width, int height)
+RImage* renderNewImage(int width, int height)
 {
 	assert(width > 0 && height > 0);
 	RImage *image = (RImage*) malloc(sizeof(RImage) + width * height * sizeof(RColor));
@@ -143,10 +145,69 @@ void renderNewImage(int width, int height)
 	image->pixels = (RColor*) (image + 1);
 	image->width = width;
 	image->height = height;
+	return image;
+}
+
+void renderFreeImage(RImage* image)
+{
+	free(image);
 }
 
 
-void renderSetFontTabWidth(RFont* font, int n)
+static GlyphSet* loadGlyphset(RFont* font, int idx)
 {
+	GlyphSet *set = (GlyphSet*) checkAlloc(calloc(1, sizeof(GlyphSet)));
 
+	// image init
+	int width  = INIT_IMAGE_WIDTH;
+	int height = INIT_IMAGE_HEIGHT;
+
+	bool validBufferSize = false;
+
+
+	while (!validBufferSize)
+	{
+
+		set->image = renderNewImage(width, height);
+
+		// basically doing this "pixels / (ascent - descent)" but fancy :).
+		float s = 
+			stbtt_ScaleForMappingEmToPixels(&font->stbfont, 1) /
+      stbtt_ScaleForPixelHeight(&font->stbfont, 1);
+
+    int res = stbtt_BakeFontBitmap((const unsigned char*) font->data, 0, font->size * s, 
+    	(unsigned char*) set->image->pixels,
+    	width, height, idx * 256, 256, set->glyphs);
+
+    // if size is not enough DOUBLE ITTTT.
+    if (res < 0) {
+    	width *= 2;
+    	width *= 2;
+    	renderFreeImage(set->image);
+    	continue;
+    }
+    validBufferSize = true;
+	}
+
+	int asc, desc, linegap;
+  stbtt_GetFontVMetrics(&font->stbfont, &asc, &desc, &linegap);
+
+	float scale = stbtt_ScaleForMappingEmToPixels(&font->stbfont, font->size);
+	int scaledAsc = asc * scale * 0.5;
+
+	for (int i = 0; i < 256; i++) {
+    /* align glyphs properly with the baseline */
+    set->glyphs[i].yoff += scaledAsc;
+    /* ensure integer values for pixel-perfect rendering && to remove fractional spacing */
+    set->glyphs[i].xadvance = floor(set->glyphs[i].xadvance);
+  }
+
+  /* convert 8bit data to 32bit */
+  for (int i = width * height - 1; i >= 0; i--) {
+    /* cast to uint8_t ptr and then offset it by i */
+    uint8_t n = *((uint8_t*) set->image->pixels + i);
+    set->image->pixels[i] = (RColor){ .r = 255, .g = 255, .b = 255, .a = n};
+  }
+
+  return set;
 }
