@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <SDL2/SDL.h>
 
-#include "render/render.hpp"
+#include "render/Renderer.hpp"
 
 
 #include "api/Api.hpp"

@@ -1,5 +1,4 @@
-#include "render.hpp"
-#include "rcompiler.hpp"
+#include "Renderer.hpp"
 
 #include "../lib/stb/stb_truetype.h"
 #include <SDL2/SDL_surface.h>
@@ -13,18 +12,18 @@
 
 // Structs
 
-struct RImage {
-	RColor *pixels;
+struct Renderer::Image {
+	Renderer::Color *pixels;
 	int width, height;
 };
 
 typedef struct {
-  RImage *image;
+  Renderer::Image *image;
   stbtt_bakedchar glyphs[256];
 } GlyphSet;
 
 
-struct RFont {
+struct Renderer::Font {
   void *data;
   stbtt_fontinfo stbfont;
   GlyphSet *sets[MAX_GLYPHSET];
@@ -68,7 +67,7 @@ static const char* utf8ToCodePoint(const char *p, unsigned *dst)
 	return p + 1;
 }
 
-static inline RColor blendPixel(RColor dst, RColor src)
+static inline Renderer::Color blendPixel(Renderer::Color dst, Renderer::Color src)
 {
 	int ia = 0xff - src.a;
 	dst.r = ((src.r * src.a) + (dst.r * ia)) >> 8;
@@ -78,7 +77,7 @@ static inline RColor blendPixel(RColor dst, RColor src)
 }
 
 
-static inline RColor blendPixel2(RColor dst, RColor src, RColor color)
+static inline Renderer::Color blendPixel2(Renderer::Color dst, Renderer::Color src, Renderer::Color color)
 {
 	src.a = (src.a * color.a) >> 8;
   int ia = 0xff - src.a;
@@ -97,7 +96,7 @@ static void* checkAlloc(void *ptr)
 	return ptr;
 }
 
-static GlyphSet* getGlyphset(RFont *font, int codepoint)
+static GlyphSet* getGlyphset(Renderer::Font *font, int codepoint)
 {
 
 }
@@ -107,7 +106,7 @@ static GlyphSet* getGlyphset(RFont *font, int codepoint)
 
 
 
-void renderSetClipRect(RRect rect)
+void Renderer::renderSetClipRect(Renderer::Rect rect)
 {
 	_clip.left 		= rect.x();
 	_clip.top 		= rect.y();
@@ -115,12 +114,12 @@ void renderSetClipRect(RRect rect)
 	_clip.bottom 	= rect.y() + rect.height();
 }
 
-RRect renderGetClipDims()
+Renderer::Rect Renderer::renderGetClipDims()
 {
 	return {_clip.left, _clip.top, _clip.right - _clip.left, _clip.bottom - _clip.top};
 }
 
-void renderInitSDLWindow(SDL_Window *win)
+void Renderer::renderInitSDLWindow(SDL_Window *win)
 {
 	// render is not responsibe for creating the window it gets a ref of it.
 	RENDER_ASSERT(win);
@@ -129,7 +128,7 @@ void renderInitSDLWindow(SDL_Window *win)
 }
 
 
-void 	renderGetSize(int* w, int* h)
+void Renderer::renderGetSize(int* w, int* h)
 {
 	SDL_Surface *s = SDL_GetWindowSurface(window);
 	*w = s->w;
@@ -137,24 +136,24 @@ void 	renderGetSize(int* w, int* h)
 }
 
 
-RImage* renderNewImage(int width, int height)
+Renderer::Image* Renderer::renderNewImage(int width, int height)
 {
 	assert(width > 0 && height > 0);
-	RImage *image = (RImage*) malloc(sizeof(RImage) + width * height * sizeof(RColor));
+	Image *image = (Image*) malloc(sizeof(Image) + width * height * sizeof(Color));
 	checkAlloc(image);
-	image->pixels = (RColor*) (image + 1);
+	image->pixels = (Color*) (image + 1);
 	image->width = width;
 	image->height = height;
 	return image;
 }
 
-void renderFreeImage(RImage* image)
+void Renderer::renderFreeImage(Renderer::Image* image)
 {
 	free(image);
 }
 
 
-static GlyphSet* loadGlyphset(RFont* font, int idx)
+static GlyphSet* loadGlyphset(Renderer::Font* font, int idx)
 {
 	GlyphSet *set = (GlyphSet*) checkAlloc(calloc(1, sizeof(GlyphSet)));
 
@@ -168,7 +167,7 @@ static GlyphSet* loadGlyphset(RFont* font, int idx)
 	while (!validBufferSize)
 	{
 
-		set->image = renderNewImage(width, height);
+		set->image = Renderer::renderNewImage(width, height);
 
 		// basically doing this "pixels / (ascent - descent)" but fancy :).
 		float s = 
@@ -206,7 +205,7 @@ static GlyphSet* loadGlyphset(RFont* font, int idx)
   for (int i = width * height - 1; i >= 0; i--) {
     /* cast to uint8_t ptr and then offset it by i */
     uint8_t n = *((uint8_t*) set->image->pixels + i);
-    set->image->pixels[i] = (RColor){ .r = 255, .g = 255, .b = 255, .a = n};
+    set->image->pixels[i] = (Renderer::Color){ .r = 255, .g = 255, .b = 255, .a = n};
   }
 
   return set;

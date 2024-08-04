@@ -3,12 +3,35 @@
 
 #ifdef RUN_TESTS
 
+#include <iostream>
+
 #include <SDL2/SDL.h>
 #include "../../tools/utest.h"
 #include "../../tools/log.h"
 #include "../render.hpp"
 
 
+// Structs
+
+struct RImage {
+	RColor *pixels;
+	int width, height;
+};
+
+/*typedef struct {
+  RImage *image;
+  stbtt_bakedchar glyphs[256];
+} GlyphSet;
+
+
+struct RFont {
+  void *data;
+  stbtt_fontinfo stbfont;
+  GlyphSet *sets[MAX_GLYPHSET];
+  float size;
+  int height;
+};
+*/
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
@@ -85,5 +108,14 @@ UTEST(Render, InitSdlWin) {
 
 	close();
 }
+
+
+UTEST(Render, renderNewImage) {
+	RImage *image = renderNewImage(200, 400);
+
+	ASSERT_EQ(image->width, 200);
+	ASSERT_EQ(image->height, 400);
+}
+
 
 #endif

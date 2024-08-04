@@ -9,7 +9,7 @@ if [ "$1" = "push" ]; then
 fi
 
 
-cflags="-Wall -O3 -g -std=gnu++11 -fno-strict-aliasing -Isrc"
+cflags="-Wall -O3 -g -std=gnu++17 -fno-strict-aliasing -Isrc"
 lflags="-lSDL2 -lm"
 
 
